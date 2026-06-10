@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyNow — University Partnership Tracker (Admin)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{--sn-blue:#1a3c6e;--sn-gold:#f5a623;--sn-light:#f0f4f9;--radius:8px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',sans-serif;background:var(--sn-light);color:#222;}
+  #login-overlay{position:fixed;inset:0;background:var(--sn-blue);display:flex;align-items:center;justify-content:center;z-index:9999;}
+  .login-box{background:#fff;border-radius:12px;padding:40px;width:360px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.3);}
+  .login-box h2{color:var(--sn-blue);margin-bottom:6px;font-size:1.4rem;}
+  .login-box p{color:#666;font-size:.85rem;margin-bottom:24px;}
+  .login-box input{width:100%;padding:10px 14px;border:1.5px solid #ccd;border-radius:var(--radius);font-size:1rem;margin-bottom:14px;}
+  .login-box input:focus{outline:none;border-color:var(--sn-blue);}
+  .btn-login{width:100%;background:var(--sn-blue);color:#fff;border:none;border-radius:var(--radius);padding:11px;font-size:1rem;cursor:pointer;font-weight:600;}
+  .btn-login:hover{background:#0f2a52;}
+  .login-error{color:#c0392b;font-size:.85rem;margin-top:10px;}
+  header{background:var(--sn-blue);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+  header .brand{display:flex;align-items:center;gap:12px;}
+  header .brand h1{font-size:1.2rem;font-weight:700;}
+  header .brand span{font-size:.8rem;opacity:.7;}
+  .badge-admin{background:var(--sn-gold);color:#1a3c6e;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;}
+  .header-actions{display:flex;gap:10px;align-items:center;}
+  .btn{padding:8px 16px;border-radius:var(--radius);border:none;cursor:pointer;font-size:.85rem;font-weight:600;transition:.15s;}
+  .btn-primary{background:var(--sn-gold);color:var(--sn-blue);}  .btn-primary:hover{background:#e09510;}
+  .btn-secondary{background:rgba(255,255,255,.15);color:#fff;}   .btn-secondary:hover{background:rgba(255,255,255,.25);}
+  .btn-danger{background:#c0392b;color:#fff;}  .btn-danger:hover{background:#a93226;}
+  .btn-sm{padding:4px 10px;font-size:.78rem;}
+  .tab-nav{display:flex;background:#fff;border-bottom:2px solid #dde;padding:0 28px;}
+  .tab-btn{padding:13px 22px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;background:none;color:#888;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;}
+  .tab-btn:hover{color:var(--sn-blue);}  .tab-btn.active{color:var(--sn-blue);border-bottom-color:var(--sn-blue);}
+  .tab-panel{display:none;}  .tab-panel.active{display:block;}
+  .stats-bar{display:flex;gap:14px;padding:18px 28px;flex-wrap:wrap;background:#fff;border-bottom:1px solid #dde;}
+  .stat-card{background:var(--sn-light);border-radius:var(--radius);padding:12px 18px;min-width:130px;border-left:4px solid var(--sn-blue);flex:1;}
+  .stat-card .stat-num{font-size:1.6rem;font-weight:700;color:var(--sn-blue);}
+  .stat-card .stat-label{font-size:.75rem;color:#666;margin-top:2px;}
+  .stat-card.gold{border-left-color:var(--sn-gold);}  .stat-card.gold .stat-num{color:#b07800;}
+  .stat-card.green{border-left-color:#27ae60;}  .stat-card.green .stat-num{color:#1e7e45;}
+  .stat-card.red{border-left-color:#e74c3c;}  .stat-card.red .stat-num{color:#c0392b;}
+  .stat-card.purple{border-left-color:#8e44ad;}  .stat-card.purple .stat-num{color:#6c3483;}
+  .toolbar{display:flex;gap:10px;padding:14px 28px;flex-wrap:wrap;align-items:center;background:#fff;border-bottom:1px solid #dde;}
+  .toolbar input[type=text],.toolbar select{padding:7px 12px;border:1.5px solid #ccd;border-radius:var(--radius);font-size:.85rem;background:#fff;}
+  .toolbar input[type=text]:focus,.toolbar select:focus{outline:none;border-color:var(--sn-blue);}
+  .search-box{flex:1;min-width:200px;}
+  #save-status{font-size:.75rem;font-weight:600;padding:4px 10px;border-radius:12px;transition:.2s;}
+  #save-status.saving{background:#fef9e7;color:#9a7d0a;}
+  #save-status.saved{background:#d5f5e3;color:#1e7e45;}
+  #save-status.error{background:#fadbd8;color:#c0392b;}
+  #loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:800;gap:14px;}
+  .spinner{width:44px;height:44px;border:4px solid #dde;border-top-color:var(--sn-blue);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .table-wrap{padding:20px 28px;overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.83rem;min-width:1400px;}
+  thead th{background:var(--sn-blue);color:#fff;padding:10px 8px;text-align:left;font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:10;}
+  thead th:first-child{border-radius:6px 0 0 0;}  thead th:last-child{border-radius:0 6px 0 0;}
+  tbody tr{border-bottom:1px solid #e8ecf0;transition:background .1s;}
+  tbody tr:hover{background:#f5f8fd;}
+  tbody td{padding:8px;vertical-align:top;}
+  tbody td input,tbody td select,tbody td textarea{width:100%;padding:5px 7px;border:1.5px solid #dde;border-radius:5px;font-size:.8rem;font-family:inherit;background:#fff;transition:border .15s;}
+  tbody td input:focus,tbody td select:focus,tbody td textarea:focus{outline:none;border-color:var(--sn-blue);background:#f0f4fc;}
+  tbody td textarea{resize:vertical;min-height:38px;}
+  .country-flag{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:4px;font-weight:600;font-size:.78rem;white-space:nowrap;}
+  .flag-lithuania{background:linear-gradient(90deg,#FFB81C 33%,#007A33 33% 66%,#C1272D 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+  .flag-romania{background:linear-gradient(90deg,#002B7F 33%,#FCD116 33% 66%,#CE1126 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+  .flag-latvia{background:linear-gradient(180deg,#9E3039 33%,#fff 33% 66%,#9E3039 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+  .flag-luxembourg{background:linear-gradient(180deg,#EF3340 33%,#fff 33% 66%,#00A3E0 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+  .flag-czech{background:#003DA5;color:#fff;}
+  .flag-belgium{background:linear-gradient(90deg,#000 33%,#FAE042 33% 66%,#EF3340 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+  .flag-ireland{background:linear-gradient(90deg,#169B62 33%,#fff 33% 66%,#FF883E 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+  tr.country-lithuania{border-left:5px solid #007A33;}  tr.country-romania{border-left:5px solid #002B7F;}
+  tr.country-latvia{border-left:5px solid #9E3039;}     tr.country-luxembourg{border-left:5px solid #EF3340;}
+  tr.country-czech{border-left:5px solid #003DA5;}      tr.country-belgium{border-left:5px solid #FAE042;}
+  tr.country-ireland{border-left:5px solid #169B62;}
+  .s-not-contacted{background:#ecf0f1;color:#7f8c8d;}  .s-contacted{background:#d6eaf8;color:#1a5276;}
+  .s-awaiting{background:#fef9e7;color:#9a7d0a;}       .s-feedback{background:#d5f5e3;color:#1e7e45;}
+  .s-meeting{background:#e8daef;color:#6c3483;}         .s-followup{background:#fdebd0;color:#9c640c;}
+  .s-verbal{background:#d1f2eb;color:#0e6655;}          .s-pending{background:#fad7a0;color:#9c6400;}
+  .s-signed{background:#a9dfbf;color:#1d6a39;}          .s-active{background:#27ae60;color:#fff;}
+  .s-expired{background:#e74c3c;color:#fff;}
+  .timer-chip{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.72rem;font-weight:600;}
+  .timer-active{background:#d5f5e3;color:#1e7e45;}  .timer-warning{background:#fdebd0;color:#9c640c;}
+  .timer-expired{background:#fadbd8;color:#c0392b;} .timer-none{background:#ecf0f1;color:#999;}
+  tr.group-header td{background:#eef2f7;font-weight:700;font-size:.85rem;padding:8px 12px;border-top:2px solid #ccd;cursor:pointer;user-select:none;}
+  tr.group-header td:hover{background:#e4eaf4;}
+  .group-toggle-btn{float:right;background:var(--sn-blue);color:#fff;border:none;border-radius:4px;padding:2px 9px;font-size:.72rem;font-weight:700;cursor:pointer;transition:transform .2s;}
+  .group-toggle-btn.collapsed{transform:rotate(-90deg);}
+  tr.group-row-hidden{display:none;}
+  #float-scrollbar-wrap{position:fixed;bottom:0;left:0;right:0;z-index:500;background:rgba(255,255,255,.92);border-top:1px solid #dde;padding:4px 28px;opacity:0;transition:opacity .3s;pointer-events:none;}
+  #float-scrollbar-wrap.visible{opacity:1;pointer-events:auto;}
+  #float-scrollbar{overflow-x:scroll;overflow-y:hidden;height:14px;}
+  #float-scrollbar-inner{height:1px;}
+  #float-scrollbar::-webkit-scrollbar{height:8px;}
+  #float-scrollbar::-webkit-scrollbar-track{background:#eef2f7;border-radius:4px;}
+  #float-scrollbar::-webkit-scrollbar-thumb{background:#aab8cc;border-radius:4px;}
+  #float-scrollbar::-webkit-scrollbar-thumb:hover{background:var(--sn-blue);}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+  .modal{background:#fff;border-radius:12px;padding:28px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.2);}
+  .modal h3{color:var(--sn-blue);margin-bottom:18px;font-size:1.1rem;}
+  .modal label{display:block;font-size:.82rem;font-weight:600;color:#444;margin-bottom:4px;margin-top:12px;}
+  .modal input,.modal select,.modal textarea{width:100%;padding:8px 12px;border:1.5px solid #ccd;border-radius:var(--radius);font-size:.85rem;font-family:inherit;}
+  .modal input:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:var(--sn-blue);}
+  .modal textarea{min-height:80px;resize:vertical;}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .reminder-banner{background:#fff3cd;border:1px solid #ffc107;padding:10px 20px;font-size:.85rem;color:#856404;display:flex;align-items:center;gap:8px;}
+  .reminder-banner .close-btn{margin-left:auto;cursor:pointer;font-size:1.1rem;}
+  .reports-wrap{padding:24px 28px;}
+  .reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+  .reports-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px;}
+  .reports-grid-full{margin-bottom:20px;}
+  .chart-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.07);}
+  .chart-card h3{font-size:.82rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+  .chart-card p.chart-sub{font-size:.75rem;color:#aaa;margin-bottom:16px;}
+  .chart-canvas-wrap{position:relative;}
+  .gauge-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
+  .gauge-center .gauge-num{font-size:1.6rem;font-weight:800;color:var(--sn-blue);line-height:1;}
+  .gauge-center .gauge-lbl{font-size:.65rem;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+  .report-insight{background:#f0f4f9;border-radius:8px;padding:12px 16px;font-size:.8rem;color:#555;margin-top:14px;border-left:4px solid var(--sn-blue);}
+  .report-insight strong{color:var(--sn-blue);}
+  @media(max-width:768px){.stats-bar,.toolbar,.table-wrap,.reports-wrap{padding-left:14px;padding-right:14px;}header{padding:10px 14px;}.reports-grid,.reports-grid-3{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div id="loading-overlay" style="display:none">
+  <div class="spinner"></div>
+  <div style="color:var(--sn-blue);font-weight:600;font-size:.9rem" id="loading-msg">Loading…</div>
+</div>
+
+<div id="login-overlay">
+  <div class="login-box">
+    <div style="width:70px;height:70px;background:var(--sn-blue);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.8rem;color:#fff;font-weight:900;">SN</div>
+    <h2>StudyNow Admin</h2>
+    <p>University Partnership Tracker — Admin Access</p>
+    <input type="text" id="login-user" placeholder="Username" autocomplete="username"/>
+    <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password"/>
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="reminder-banner" class="reminder-banner" style="display:none">
+  <span>🔔</span><span id="reminder-text"></span>
+  <span class="close-btn" onclick="document.getElementById('reminder-banner').style.display='none'">✕</span>
+</div>
+
+<header>
+  <div class="brand">
+    <div style="width:38px;height:38px;background:var(--sn-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--sn-blue);font-size:.9rem;">SN</div>
+    <div><h1>University Partnership Tracker</h1><span>StudyNow International Recruitment</span></div>
+  </div>
+  <div class="header-actions">
+    <span class="badge-admin">ADMIN</span>
+    <span id="save-status"></span>
+    <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-primary" onclick="openAddModal()">+ Add University</button>
+    <button class="btn btn-secondary" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('tab-data',this)">📋 Universities</button>
+  <button class="tab-btn" onclick="switchTab('tab-reports',this)">📊 Reports & Charts</button>
+</nav>
+
+<div id="tab-data" class="tab-panel active">
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total Universities</div></div>
+    <div class="stat-card gold"><div class="stat-num" id="stat-contacted">—</div><div class="stat-label">Contacted</div></div>
+    <div class="stat-card purple"><div class="stat-num" id="stat-meetings">—</div><div class="stat-label">Meetings Scheduled</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-verbal">—</div><div class="stat-label">Verbal Agreements</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">Pending Contract</div></div>
+    <div class="stat-card green"><div class="stat-num" id="stat-signed">—</div><div class="stat-label">Signed Contracts</div></div>
+    <div class="stat-card red"><div class="stat-num" id="stat-expiring">—</div><div class="stat-label">Expiring in 90 Days</div></div>
+  </div>
+  <div class="toolbar">
+    <input type="text" class="search-box" id="search-input" placeholder="🔍  Search university, country, contact…" oninput="renderTable()"/>
+    <select id="filter-country" onchange="renderTable()">
+      <option value="">All Countries</option>
+      <option value="Lithuania">🇱🇹 Lithuania</option><option value="Romania">🇷🇴 Romania</option>
+      <option value="Latvia">🇱🇻 Latvia</option><option value="Luxembourg">🇱🇺 Luxembourg</option>
+      <option value="Czech Republic">🇨🇿 Czech Republic</option><option value="Belgium">🇧🇪 Belgium</option>
+      <option value="Ireland">🇮🇪 Ireland</option>
+    </select>
+    <select id="filter-status" onchange="renderTable()">
+      <option value="">All Statuses</option>
+      <option>Not Contacted</option><option>Contacted</option><option>Awaiting Response</option>
+      <option>Feedback Received</option><option>Meeting Scheduled</option><option>Follow-up Needed</option>
+      <option>Verbal Agreement</option><option>Pending Contract</option><option>Contract Signed</option>
+      <option>Partnership Active</option><option>Partnership Expired</option>
+    </select>
+    <select id="sort-by" onchange="renderTable()">
+      <option value="country">Group by Country</option><option value="status">Sort by Status</option>
+      <option value="name">Sort by Name</option><option value="contacted">Sort by Date Contacted</option>
+      <option value="expiry">Sort by Contract Expiry</option>
+    </select>
+    <button class="btn" style="background:#27ae60;color:#fff;" onclick="refreshData()">↻ Refresh</button>
+  </div>
+  <div class="table-wrap" id="table-wrap-div">
+    <table><thead><tr>
+      <th style="width:200px">University</th><th style="width:100px">Country</th>
+      <th style="width:130px">Status</th><th style="width:105px">Date Contacted</th>
+      <th style="width:105px">Last Contact</th><th style="width:150px">Contact / Email</th>
+      <th style="width:200px">Feedback / Notes</th><th style="width:105px">Meeting Date</th>
+      <th style="width:105px">Follow-up</th><th style="width:105px">Verbal</th>
+      <th style="width:105px">Contract Signed</th><th style="width:105px">Start</th>
+      <th style="width:105px">End</th><th style="width:110px">Validity</th>
+      <th style="width:105px">Reminder</th><th style="width:80px">Del</th>
+    </tr></thead><tbody id="table-body"></tbody></table>
+  </div>
+</div>
+
+<div id="tab-reports" class="tab-panel">
+<div class="reports-wrap">
+  <div class="reports-grid">
+    <div class="chart-card"><h3>Overall Partnership Status</h3><p class="chart-sub">All universities by current stage</p><div class="chart-canvas-wrap" style="height:280px"><canvas id="chart-status-donut"></canvas></div><div class="report-insight" id="insight-status"></div></div>
+    <div class="chart-card"><h3>Progress by Country</h3><p class="chart-sub">Contacted vs Meetings vs Signed per country</p><div class="chart-canvas-wrap" style="height:280px"><canvas id="chart-country-grouped"></canvas></div><div class="report-insight" id="insight-country"></div></div>
+  </div>
+  <div class="reports-grid">
+    <div class="chart-card"><h3>Partnership Pipeline Funnel</h3><p class="chart-sub">Universities at each stage</p><div class="chart-canvas-wrap" style="height:300px"><canvas id="chart-pipeline-bar"></canvas></div></div>
+    <div class="chart-card"><h3>Status Breakdown by Country</h3><p class="chart-sub">Stacked view per country</p><div class="chart-canvas-wrap" style="height:300px"><canvas id="chart-stacked-country"></canvas></div></div>
+  </div>
+  <div class="reports-grid-3">
+    <div class="chart-card" style="text-align:center"><h3>Outreach Rate</h3><p class="chart-sub">% contacted</p><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-gauge-contacted"></canvas><div class="gauge-center"><div class="gauge-num" id="gauge-contacted-pct">—</div><div class="gauge-lbl">Contacted</div></div></div></div>
+    <div class="chart-card" style="text-align:center"><h3>Negotiation Rate</h3><p class="chart-sub">% verbal / pending</p><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-gauge-negotiation"></canvas><div class="gauge-center"><div class="gauge-num" id="gauge-negotiation-pct">—</div><div class="gauge-lbl">Negotiating</div></div></div></div>
+    <div class="chart-card" style="text-align:center"><h3>Conversion Rate</h3><p class="chart-sub">% signed</p><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-gauge-signed"></canvas><div class="gauge-center"><div class="gauge-num" id="gauge-signed-pct">—</div><div class="gauge-lbl">Signed</div></div></div></div>
+  </div>
+  <div class="reports-grid-full">
+    <div class="chart-card"><h3>Contract Portfolio Health</h3><p class="chart-sub">Active, expiring, expired and pending per country</p><div class="chart-canvas-wrap" style="height:220px"><canvas id="chart-contract-health"></canvas></div><div class="report-insight" id="insight-contracts"></div></div>
+  </div>
+</div>
+</div>
+
+<div id="add-modal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <h3 id="modal-title">Add University</h3>
+    <div class="form-row">
+      <div><label>University Name *</label><input type="text" id="m-name" placeholder="University name"/></div>
+      <div><label>Country *</label>
+        <select id="m-country"><option>Lithuania</option><option>Romania</option><option>Latvia</option><option>Luxembourg</option><option>Czech Republic</option><option>Belgium</option><option>Ireland</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><label>Status</label>
+        <select id="m-status"><option>Not Contacted</option><option>Contacted</option><option>Awaiting Response</option><option>Feedback Received</option><option>Meeting Scheduled</option><option>Follow-up Needed</option><option>Verbal Agreement</option><option>Pending Contract</option><option>Contract Signed</option><option>Partnership Active</option><option>Partnership Expired</option></select>
+      </div>
+      <div><label>Contact Person / Email</label><input type="text" id="m-contact" placeholder="Name / email@uni.edu"/></div>
+    </div>
+    <div class="form-row"><div><label>Date Contacted</label><input type="date" id="m-date-contacted"/></div><div><label>Last Contact Date</label><input type="date" id="m-last-contact"/></div></div>
+    <div class="form-row"><div><label>Meeting Date</label><input type="date" id="m-meeting"/></div><div><label>Follow-up Date</label><input type="date" id="m-followup"/></div></div>
+    <div class="form-row"><div><label>Verbal Agreement Date</label><input type="date" id="m-verbal"/></div><div><label>Contract Signed Date</label><input type="date" id="m-signed"/></div></div>
+    <div class="form-row"><div><label>Contract Start</label><input type="date" id="m-contract-start"/></div><div><label>Contract End</label><input type="date" id="m-contract-end"/></div></div>
+    <label>Reminder Date</label><input type="date" id="m-reminder"/>
+    <label>Feedback / Notes</label><textarea id="m-notes" placeholder="Feedback, observations, next steps…"></textarea>
+    <div class="modal-actions">
+      <button class="btn" style="background:#ccc;color:#333;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="float-scrollbar-wrap">
+  <div id="float-scrollbar"><div id="float-scrollbar-inner"></div></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// SUPABASE CONFIG — update these two values!
+// Get them from supabase.com → Settings → API
+// ═══════════════════════════════════════════
+const SB_URL = 'https://swottaalkgzuhlkchycb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3b3R0YWFsa2d6dWhsa2NoeWNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwODMwNDgsImV4cCI6MjA5NjY1OTA0OH0.VwgHUUrIpfTwYrxSL19sQV8sxbmKm-LMFMvCGauca2A';
+
+const sbH = () => ({'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'});
+
+async function sbGet() {
+  const r = await fetch(`${SB_URL}/rest/v1/universities?select=*&order=country.asc,name.asc`,{headers:sbH()});
+  if(!r.ok) throw new Error(await r.text());
+  return (await r.json()).map(fromDb);
+}
+async function sbUpsert(row) {
+  const r = await fetch(`${SB_URL}/rest/v1/universities`,{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(toDb(row))});
+  if(!r.ok) throw new Error(await r.text());
+}
+async function sbDelete(id) {
+  const r = await fetch(`${SB_URL}/rest/v1/universities?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:sbH()});
+  if(!r.ok) throw new Error(await r.text());
+}
+async function sbSeedMany(rows) {
+  const r = await fetch(`${SB_URL}/rest/v1/universities`,{method:'POST',headers:{...sbH(),'Prefer':'return=minimal'},body:JSON.stringify(rows.map(toDb))});
+  if(!r.ok) throw new Error(await r.text());
+}
+
+function toDb(r){return{id:r.id,name:r.name,country:r.country,status:r.status,contact:r.contact||'',date_contacted:r.dateContacted||null,last_contact:r.lastContact||null,meeting:r.meeting||null,followup:r.followup||null,verbal:r.verbal||null,signed:r.signed||null,contract_start:r.contractStart||null,contract_end:r.contractEnd||null,reminder:r.reminder||null,notes:r.notes||''};}
+function fromDb(d){return{id:d.id,name:d.name,country:d.country,status:d.status,contact:d.contact||'',dateContacted:d.date_contacted||'',lastContact:d.last_contact||'',meeting:d.meeting||'',followup:d.followup||'',verbal:d.verbal||'',signed:d.signed||'',contractStart:d.contract_start||'',contractEnd:d.contract_end||'',reminder:d.reminder||'',notes:d.notes||''};}
+
+const CREDS={username:'studynow_admin',password:'StudyNow@2024!'};
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
+  if(u===CREDS.username&&p===CREDS.password){document.getElementById('login-overlay').style.display='none';sessionStorage.setItem('sn_auth','1');init();}
+  else document.getElementById('login-error').textContent='Invalid username or password.';
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function logout(){sessionStorage.removeItem('sn_auth');location.reload();}
+
+let DATA=[],editingId=null;
+const collapsedGroups=new Set(),_savePending={};
+
+function setSaveStatus(cls,txt){const e=document.getElementById('save-status');e.className=cls;e.textContent=txt;if(cls==='saved')setTimeout(()=>{e.className='';e.textContent='';},2000);}
+function showLoading(m){document.getElementById('loading-msg').textContent=m;document.getElementById('loading-overlay').style.display='flex';}
+function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
+
+const SEED=[
+  {id:'lt1',name:'Vytautas Magnus University',country:'Lithuania'},{id:'lt2',name:'Vilnius Gediminas Technical University',country:'Lithuania'},{id:'lt3',name:'Kaunas University of Technology',country:'Lithuania'},{id:'lt4',name:'Lithuanian University of Health Sciences',country:'Lithuania'},{id:'lt5',name:'ISM University of Management and Economics',country:'Lithuania'},{id:'lt6',name:'LCC International University',country:'Lithuania'},{id:'lt7',name:'Mykolas Romeris University',country:'Lithuania'},{id:'lt8',name:'Kazimieras Simonavicius University',country:'Lithuania'},
+  {id:'ro1',name:'ASE Bucharest – University of Economic Studies',country:'Romania'},{id:'ro2',name:'University of Bucharest',country:'Romania'},{id:'ro3',name:'Babeș-Bolyai University',country:'Romania'},{id:'ro4',name:'Alexandru Ioan Cuza University of Iași',country:'Romania'},{id:'ro5',name:'West University of Timișoara',country:'Romania'},{id:'ro6',name:'Transilvania University of Brașov',country:'Romania'},{id:'ro7',name:'Politehnica University of Bucharest',country:'Romania'},{id:'ro8',name:'Politehnica University of Timișoara',country:'Romania'},{id:'ro9',name:'Carol Davila University of Medicine and Pharmacy',country:'Romania'},{id:'ro10',name:'Grigore T. Popa University of Medicine and Pharmacy',country:'Romania'},{id:'ro11',name:'Iuliu Hațieganu University of Medicine and Pharmacy',country:'Romania'},
+  {id:'lv1',name:'Riga Technical University',country:'Latvia'},{id:'lv2',name:'Latvia University of Life Sciences and Technologies',country:'Latvia'},{id:'lv3',name:'Daugavpils University',country:'Latvia'},
+  {id:'lu1',name:'University of Luxembourg',country:'Luxembourg'},{id:'lu2',name:'Lunex University',country:'Luxembourg'},{id:'lu3',name:'Sacred Heart University',country:'Luxembourg'},
+  {id:'cz1',name:'Charles University',country:'Czech Republic'},{id:'cz2',name:'Czech Technical University in Prague',country:'Czech Republic'},{id:'cz3',name:'Masaryk University',country:'Czech Republic'},{id:'cz4',name:'Brno University of Technology',country:'Czech Republic'},
+  {id:'be1',name:'KU Leuven University',country:'Belgium'},{id:'be2',name:'Ghent University',country:'Belgium'},{id:'be3',name:'Vrije Universiteit Brussel',country:'Belgium'},{id:'be4',name:'University of Antwerp',country:'Belgium'},{id:'be5',name:'UCLouvain',country:'Belgium'},{id:'be6',name:'Université Libre de Bruxelles',country:'Belgium'},{id:'be7',name:'Hasselt University',country:'Belgium'},{id:'be8',name:'Thomas More University',country:'Belgium'},
+  {id:'ie1',name:'University College Dublin',country:'Ireland'},{id:'ie2',name:'Trinity College Dublin',country:'Ireland'},{id:'ie3',name:'University of Limerick',country:'Ireland'},{id:'ie4',name:'Technological University Dublin',country:'Ireland'},{id:'ie5',name:'Munster Technological University',country:'Ireland'},
+].map(r=>({...r,status:'Not Contacted',contact:'',dateContacted:'',lastContact:'',meeting:'',followup:'',verbal:'',signed:'',contractStart:'',contractEnd:'',reminder:'',notes:''}));
+
+async function init(){
+  showLoading('Connecting to database…');
+  try{
+    DATA=await sbGet();
+    if(DATA.length===0){showLoading('First run — setting up universities…');await sbSeedMany(SEED);DATA=await sbGet();}
+  }catch(e){
+    hideLoading();
+    alert('Cannot connect to database.\n\nPlease update SB_URL and SB_KEY in admin.html with your Supabase credentials (see DEPLOY.md for instructions).');
+    return;
+  }
+  hideLoading();renderTable();checkReminders();initFloatingScrollbar();
+}
+
+async function refreshData(){
+  showLoading('Refreshing…');
+  try{DATA=await sbGet();}catch(e){setSaveStatus('error','⚠ Refresh failed');}
+  hideLoading();renderTable();
+}
+
+function ck(c){return c.toLowerCase().replace(/\s+/g,'').replace('czechrepublic','czech');}
+const FLAG={'Lithuania':'🇱🇹','Romania':'🇷🇴','Latvia':'🇱🇻','Luxembourg':'🇱🇺','Czech Republic':'🇨🇿','Belgium':'🇧🇪','Ireland':'🇮🇪'};
+const SCLS={'Not Contacted':'s-not-contacted','Contacted':'s-contacted','Awaiting Response':'s-awaiting','Feedback Received':'s-feedback','Meeting Scheduled':'s-meeting','Follow-up Needed':'s-followup','Verbal Agreement':'s-verbal','Pending Contract':'s-pending','Contract Signed':'s-signed','Partnership Active':'s-active','Partnership Expired':'s-expired'};
+
+function timer(d){if(!d)return'<span class="timer-chip timer-none">—</span>';const t=new Date();t.setHours(0,0,0,0);const diff=Math.ceil((new Date(d)-t)/86400000);if(diff<0)return`<span class="timer-chip timer-expired">Expired ${Math.abs(diff)}d ago</span>`;if(diff<=90)return`<span class="timer-chip timer-warning">${diff}d left</span>`;return`<span class="timer-chip timer-active">${Math.floor(diff/30)}m ${diff%30}d</span>`;}
+
+function calcStats(data){
+  const t=new Date();t.setHours(0,0,0,0);
+  document.getElementById('stat-total').textContent=data.length;
+  document.getElementById('stat-contacted').textContent=data.filter(d=>d.dateContacted).length;
+  document.getElementById('stat-meetings').textContent=data.filter(d=>d.status==='Meeting Scheduled').length;
+  document.getElementById('stat-verbal').textContent=data.filter(d=>d.status==='Verbal Agreement'||d.verbal).length;
+  document.getElementById('stat-pending').textContent=data.filter(d=>d.status==='Pending Contract').length;
+  document.getElementById('stat-signed').textContent=data.filter(d=>d.signed||d.status==='Contract Signed'||d.status==='Partnership Active').length;
+  document.getElementById('stat-expiring').textContent=data.filter(d=>{if(!d.contractEnd)return false;const diff=Math.ceil((new Date(d.contractEnd)-t)/86400000);return diff>=0&&diff<=90;}).length;
+}
+
+function renderTable(){
+  const q=document.getElementById('search-input').value.toLowerCase(),fc=document.getElementById('filter-country').value,fs=document.getElementById('filter-status').value,sb=document.getElementById('sort-by').value;
+  const ORD=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland'];
+  let rows=DATA.filter(d=>(!q||d.name.toLowerCase().includes(q)||d.country.toLowerCase().includes(q)||(d.contact||'').toLowerCase().includes(q)||(d.notes||'').toLowerCase().includes(q))&&(!fc||d.country===fc)&&(!fs||d.status===fs));
+  if(sb==='country')rows.sort((a,b)=>(ORD.indexOf(a.country)-ORD.indexOf(b.country))||a.name.localeCompare(b.name));
+  else if(sb==='status')rows.sort((a,b)=>a.status.localeCompare(b.status));
+  else if(sb==='name')rows.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sb==='contacted')rows.sort((a,b)=>(b.dateContacted||'').localeCompare(a.dateContacted||''));
+  else if(sb==='expiry')rows.sort((a,b)=>(a.contractEnd||'9999').localeCompare(b.contractEnd||'9999'));
+  let html='',lastC=null;
+  rows.forEach(row=>{
+    const k=ck(row.country);
+    if(sb==='country'&&row.country!==lastC){lastC=row.country;const isCol=collapsedGroups.has(row.country);html+=`<tr class="group-header" onclick="toggleGroup('${row.country}')"><td colspan="16">${FLAG[row.country]||''} ${row.country}<button class="group-toggle-btn${isCol?' collapsed':''}" title="${isCol?'Expand':'Collapse'}">▼</button></td></tr>`;}
+    const hidden=collapsedGroups.has(row.country)?' group-row-hidden':'';
+    html+=`<tr class="country-${k}${hidden}" data-id="${row.id}" data-country="${row.country}">
+      <td><input type="text" value="${esc(row.name)}" data-field="name" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><span class="country-flag flag-${k}">${FLAG[row.country]||''} ${row.country}</span></td>
+      <td><select data-field="status" data-id="${row.id}" onchange="fc_(this)">${sOpts(row.status)}</select></td>
+      <td><input type="date" value="${row.dateContacted||''}" data-field="dateContacted" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><input type="date" value="${row.lastContact||''}" data-field="lastContact" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><input type="text" value="${esc(row.contact||'')}" data-field="contact" data-id="${row.id}" onchange="fc_(this)" placeholder="Name/email"/></td>
+      <td><textarea data-field="notes" data-id="${row.id}" onchange="fc_(this)" placeholder="Notes…">${esc(row.notes||'')}</textarea></td>
+      <td><input type="date" value="${row.meeting||''}" data-field="meeting" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><input type="date" value="${row.followup||''}" data-field="followup" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><input type="date" value="${row.verbal||''}" data-field="verbal" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><input type="date" value="${row.signed||''}" data-field="signed" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><input type="date" value="${row.contractStart||''}" data-field="contractStart" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><input type="date" value="${row.contractEnd||''}" data-field="contractEnd" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td>${timer(row.contractEnd)}</td>
+      <td><input type="date" value="${row.reminder||''}" data-field="reminder" data-id="${row.id}" onchange="fc_(this)"/></td>
+      <td><button class="btn btn-danger btn-sm" onclick="delRow('${row.id}')">✕</button></td>
+    </tr>`;
+  });
+  if(!rows.length)html=`<tr><td colspan="16" style="text-align:center;padding:30px;color:#999">No universities match your filters.</td></tr>`;
+  document.getElementById('table-body').innerHTML=html;
+  calcStats(DATA);
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function sOpts(sel){return['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'].map(o=>`<option${o===sel?' selected':''}>${o}</option>`).join('');}
+
+function fc_(el){
+  const id=el.dataset.id,field=el.dataset.field,val=el.value;
+  const idx=DATA.findIndex(d=>d.id===id);if(idx<0)return;
+  DATA[idx][field]=val;setSaveStatus('saving','💾 Saving…');
+  clearTimeout(_savePending[id]);
+  _savePending[id]=setTimeout(async()=>{try{await sbUpsert(DATA[idx]);setSaveStatus('saved','✓ Saved');}catch(e){setSaveStatus('error','⚠ Failed');console.error(e);}if(field==='contractEnd')renderTable();else calcStats(DATA);},700);
+}
+
+async function delRow(id){
+  if(!confirm('Delete this university record?'))return;
+  setSaveStatus('saving','💾 Deleting…');
+  try{await sbDelete(id);DATA=DATA.filter(d=>d.id!==id);setSaveStatus('saved','✓ Deleted');renderTable();}
+  catch(e){setSaveStatus('error','⚠ Failed');}
+}
+
+function openAddModal(){
+  editingId=null;document.getElementById('modal-title').textContent='Add University';
+  ['m-name','m-contact','m-date-contacted','m-last-contact','m-meeting','m-followup','m-verbal','m-signed','m-contract-start','m-contract-end','m-reminder','m-notes'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('m-status').value='Not Contacted';document.getElementById('m-country').value='Lithuania';
+  document.getElementById('add-modal').style.display='flex';
+}
+function closeModal(){document.getElementById('add-modal').style.display='none';}
+
+async function saveModal(){
+  const name=document.getElementById('m-name').value.trim();if(!name){alert('Please enter a university name.');return;}
+  const rec={id:editingId||('u'+Date.now()),name,country:document.getElementById('m-country').value,status:document.getElementById('m-status').value,contact:document.getElementById('m-contact').value,dateContacted:document.getElementById('m-date-contacted').value,lastContact:document.getElementById('m-last-contact').value,meeting:document.getElementById('m-meeting').value,followup:document.getElementById('m-followup').value,verbal:document.getElementById('m-verbal').value,signed:document.getElementById('m-signed').value,contractStart:document.getElementById('m-contract-start').value,contractEnd:document.getElementById('m-contract-end').value,reminder:document.getElementById('m-reminder').value,notes:document.getElementById('m-notes').value};
+  setSaveStatus('saving','💾 Saving…');
+  try{await sbUpsert(rec);const idx=DATA.findIndex(d=>d.id===rec.id);if(idx>-1)DATA[idx]=rec;else DATA.push(rec);setSaveStatus('saved','✓ Saved');closeModal();renderTable();}
+  catch(e){setSaveStatus('error','⚠ Failed');}
+}
+
+function checkReminders(){const today=new Date().toISOString().split('T')[0];const due=DATA.filter(d=>d.reminder&&d.reminder<=today);if(due.length){document.getElementById('reminder-text').textContent=`${due.length} reminder(s) due: ${due.map(d=>d.name).join(', ')}`;document.getElementById('reminder-banner').style.display='flex';}}
+
+function exportCSV(){const h=['University','Country','Status','Date Contacted','Last Contact','Contact','Notes','Meeting','Follow-up','Verbal','Signed','Start','End','Reminder'];const rows=DATA.map(d=>[d.name,d.country,d.status,d.dateContacted,d.lastContact,d.contact,d.notes,d.meeting,d.followup,d.verbal,d.signed,d.contractStart,d.contractEnd,d.reminder].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(','));const blob=new Blob([[h.join(','),...rows].join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`studynow_${new Date().toISOString().split('T')[0]}.csv`;a.click();}
+
+function toggleGroup(country){if(collapsedGroups.has(country))collapsedGroups.delete(country);else collapsedGroups.add(country);document.querySelectorAll(`tr[data-country="${country}"]`).forEach(tr=>tr.classList.toggle('group-row-hidden',collapsedGroups.has(country)));document.querySelectorAll('tr.group-header').forEach(tr=>{if(tr.textContent.includes(country)){const btn=tr.querySelector('.group-toggle-btn');if(btn)btn.classList.toggle('collapsed',collapsedGroups.has(country));}});}
+
+let _hideT=null;
+function initFloatingScrollbar(){
+  const wrap=document.getElementById('table-wrap-div'),fw=document.getElementById('float-scrollbar-wrap'),fb=document.getElementById('float-scrollbar'),fi=document.getElementById('float-scrollbar-inner');
+  if(!wrap)return;
+  function syncW(){const t=wrap.querySelector('table');if(t)fi.style.width=t.scrollWidth+'px';}syncW();
+  function show(){fw.classList.add('visible');clearTimeout(_hideT);_hideT=setTimeout(()=>fw.classList.remove('visible'),2000);}
+  wrap.addEventListener('scroll',()=>{fb.scrollLeft=wrap.scrollLeft;show();});
+  fb.addEventListener('scroll',()=>{wrap.scrollLeft=fb.scrollLeft;show();});
+  wrap.addEventListener('mouseenter',show);
+  fw.addEventListener('mouseenter',()=>{fw.classList.add('visible');clearTimeout(_hideT);});
+  fw.addEventListener('mouseleave',()=>{_hideT=setTimeout(()=>fw.classList.remove('visible'),1200);});
+  new MutationObserver(syncW).observe(wrap,{childList:true,subtree:true});
+}
+
+function switchTab(id,btn){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');if(id==='tab-reports')renderCharts();}
+
+const CI={};
+const SC={'Not Contacted':'#bdc3c7','Contacted':'#3498db','Awaiting Response':'#f1c40f','Feedback Received':'#2ecc71','Meeting Scheduled':'#9b59b6','Follow-up Needed':'#e67e22','Verbal Agreement':'#1abc9c','Pending Contract':'#f39c12','Contract Signed':'#27ae60','Partnership Active':'#1e8449','Partnership Expired':'#e74c3c'};
+const CO=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland'];
+const SO=['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'];
+function dC(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
+function gauge(id,pct,color){dC(id);const s=Math.min(100,Math.max(0,pct));CI[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{datasets:[{data:[s,100-s],backgroundColor:[color,'#eef2f7'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',rotation:-90,circumference:180,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:800}}});}
+
+function renderCharts(){
+  const data=DATA;if(!data.length)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const sc={};SO.forEach(s=>sc[s]=0);data.forEach(d=>{if(sc[d.status]!==undefined)sc[d.status]++;});
+  const dl=SO.filter(s=>sc[s]>0),dd=dl.map(s=>sc[s]),dc=dl.map(s=>SC[s]);
+  dC('chart-status-donut');CI['chart-status-donut']=new Chart(document.getElementById('chart-status-donut'),{type:'doughnut',data:{labels:dl,datasets:[{data:dd,backgroundColor:dc,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{cutout:'60%',plugins:{legend:{position:'right',labels:{font:{size:11},padding:10,boxWidth:12}},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/data.length*100)}%)`}}}}});
+  const top=dl[dd.indexOf(Math.max(...dd))];document.getElementById('insight-status').innerHTML=`<strong>${sc['Not Contacted']}</strong> not yet contacted · <strong>${(sc['Partnership Active']||0)+(sc['Contract Signed']||0)}</strong> active/signed · Largest group: <strong>${top}</strong>`;
+  const bc={};CO.forEach(c=>bc[c]={c:0,m:0,v:0,s:0,t:0});data.forEach(d=>{if(!bc[d.country])bc[d.country]={c:0,m:0,v:0,s:0,t:0};bc[d.country].t++;if(d.dateContacted)bc[d.country].c++;if(d.meeting||d.status==='Meeting Scheduled')bc[d.country].m++;if(d.verbal||d.status==='Verbal Agreement')bc[d.country].v++;if(d.signed||d.status==='Contract Signed'||d.status==='Partnership Active')bc[d.country].s++;});
+  const cl=CO.filter(c=>bc[c].t>0);dC('chart-country-grouped');CI['chart-country-grouped']=new Chart(document.getElementById('chart-country-grouped'),{type:'bar',data:{labels:cl,datasets:[{label:'Contacted',data:cl.map(c=>bc[c].c),backgroundColor:'#3498db',borderRadius:3},{label:'Meetings',data:cl.map(c=>bc[c].m),backgroundColor:'#9b59b6',borderRadius:3},{label:'Verbal/Pending',data:cl.map(c=>bc[c].v),backgroundColor:'#1abc9c',borderRadius:3},{label:'Signed',data:cl.map(c=>bc[c].s),backgroundColor:'#27ae60',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}}}}});
+  const lc=cl.reduce((b,c)=>bc[c].c>bc[b].c?c:b,cl[0]);document.getElementById('insight-country').innerHTML=`<strong>${lc}</strong> leads with <strong>${bc[lc].c}</strong> contacts · <strong>${cl.filter(c=>bc[c].s>0).length}</strong> countries have signed`;
+  dC('chart-pipeline-bar');CI['chart-pipeline-bar']=new Chart(document.getElementById('chart-pipeline-bar'),{type:'bar',data:{labels:SO,datasets:[{label:'Universities',data:SO.map(s=>sc[s]||0),backgroundColor:SO.map(s=>SC[s]),borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} (${Math.round((ctx.raw||0)/data.length*100)}%)`}}},scales:{x:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  const sd=SO.filter(s=>sc[s]>0).map(s=>({label:s,data:CO.map(c=>data.filter(d=>d.country===c&&d.status===s).length),backgroundColor:SC[s],borderWidth:0,borderRadius:2}));dC('chart-stacked-country');CI['chart-stacked-country']=new Chart(document.getElementById('chart-stacked-country'),{type:'bar',data:{labels:CO,datasets:sd},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}}}}});
+  const tot=data.length,cp=Math.round(data.filter(d=>d.dateContacted).length/tot*100),np=Math.round(data.filter(d=>d.status==='Verbal Agreement'||d.status==='Pending Contract'||d.verbal).length/tot*100),sp=Math.round(data.filter(d=>d.signed||d.status==='Contract Signed'||d.status==='Partnership Active').length/tot*100);
+  gauge('chart-gauge-contacted',cp,'#3498db');gauge('chart-gauge-negotiation',np,'#1abc9c');gauge('chart-gauge-signed',sp,'#27ae60');
+  document.getElementById('gauge-contacted-pct').textContent=cp+'%';document.getElementById('gauge-negotiation-pct').textContent=np+'%';document.getElementById('gauge-signed-pct').textContent=sp+'%';
+  const hd=CO.map(c=>{const u=data.filter(d=>d.country===c);return{a:u.filter(d=>d.contractEnd&&Math.ceil((new Date(d.contractEnd)-today)/86400000)>90).length,e:u.filter(d=>d.contractEnd&&Math.ceil((new Date(d.contractEnd)-today)/86400000)>=0&&Math.ceil((new Date(d.contractEnd)-today)/86400000)<=90).length,x:u.filter(d=>d.contractEnd&&Math.ceil((new Date(d.contractEnd)-today)/86400000)<0).length,n:u.filter(d=>!d.contractEnd).length};});
+  dC('chart-contract-health');CI['chart-contract-health']=new Chart(document.getElementById('chart-contract-health'),{type:'bar',data:{labels:CO,datasets:[{label:'Active',data:hd.map(h=>h.a),backgroundColor:'#27ae60',borderRadius:3},{label:'Expiring ≤90d',data:hd.map(h=>h.e),backgroundColor:'#f39c12',borderRadius:3},{label:'Expired',data:hd.map(h=>h.x),backgroundColor:'#e74c3c',borderRadius:3},{label:'No Contract',data:hd.map(h=>h.n),backgroundColor:'#ecf0f1',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}}}}});
+  const te=hd.reduce((a,h)=>a+h.e,0),tx=hd.reduce((a,h)=>a+h.x,0);document.getElementById('insight-contracts').innerHTML=te+tx>0?`⚠️ <strong>${te}</strong> expiring ≤90d · <strong>${tx}</strong> expired · Action required`:`✅ All active contracts healthy`;
+}
+
+if(sessionStorage.getItem('sn_auth')==='1'){document.getElementById('login-overlay').style.display='none';window.addEventListener('DOMContentLoaded',init);}
+</script>
+</body>
+</html>

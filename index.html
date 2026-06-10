@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyNow — Partnership Progress Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{--sn-blue:#1a3c6e;--sn-gold:#f5a623;--sn-light:#f0f4f9;--radius:8px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',sans-serif;background:var(--sn-light);color:#222;}
+  header{background:var(--sn-blue);color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,.2);}
+  header .brand{display:flex;align-items:center;gap:14px;}
+  .logo{width:44px;height:44px;background:var(--sn-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--sn-blue);font-size:1rem;}
+  header .brand h1{font-size:1.25rem;font-weight:700;}
+  header .brand p{font-size:.8rem;opacity:.7;margin-top:2px;}
+  .badge-view{background:rgba(255,255,255,.15);color:#fff;padding:4px 14px;border-radius:20px;font-size:.75rem;}
+  .last-updated{font-size:.75rem;opacity:.6;}
+  .tab-nav{display:flex;background:#fff;border-bottom:2px solid #dde;padding:0 28px;}
+  .tab-btn{padding:13px 22px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;background:none;color:#888;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;}
+  .tab-btn:hover{color:var(--sn-blue);}  .tab-btn.active{color:var(--sn-blue);border-bottom-color:var(--sn-blue);}
+  .tab-panel{display:none;}  .tab-panel.active{display:block;}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;padding:24px 28px 10px;}
+  .stat-card{background:#fff;border-radius:10px;padding:18px 16px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:4px solid var(--sn-blue);transition:transform .15s;}
+  .stat-card:hover{transform:translateY(-2px);}
+  .stat-card .num{font-size:2rem;font-weight:800;color:var(--sn-blue);line-height:1;}
+  .stat-card .lbl{font-size:.75rem;color:#888;margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+  .stat-card.gold{border-top-color:var(--sn-gold);}  .stat-card.gold .num{color:#b07800;}
+  .stat-card.green{border-top-color:#27ae60;}  .stat-card.green .num{color:#1e7e45;}
+  .stat-card.purple{border-top-color:#8e44ad;}  .stat-card.purple .num{color:#6c3483;}
+  .stat-card.red{border-top-color:#e74c3c;}  .stat-card.red .num{color:#c0392b;}
+  .stat-card.teal{border-top-color:#16a085;}  .stat-card.teal .num{color:#117a65;}
+  .progress-section{padding:10px 28px 20px;}
+  .progress-section h2{font-size:.85rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+  .prog-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .prog-label{font-size:.82rem;font-weight:600;width:160px;flex-shrink:0;color:#444;}
+  .prog-bar-wrap{flex:1;background:#e0e6ee;border-radius:20px;height:10px;}
+  .prog-bar{height:10px;border-radius:20px;transition:width .6s ease;}
+  .prog-count{font-size:.78rem;color:#888;width:30px;text-align:right;}
+  .toolbar{display:flex;gap:10px;padding:14px 28px 0;flex-wrap:wrap;align-items:center;}
+  .toolbar input,.toolbar select{padding:7px 12px;border:1.5px solid #ccd;border-radius:var(--radius);font-size:.85rem;background:#fff;}
+  .toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--sn-blue);}
+  .search-box{flex:1;min-width:200px;}
+  .countries-section{padding:0 28px 20px;}
+  .countries-section h2{font-size:.85rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+  .country-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+  .country-card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .country-card-header{padding:12px 16px;display:flex;align-items:center;gap:10px;font-weight:700;font-size:.95rem;color:#fff;cursor:pointer;user-select:none;}
+  .country-card-header:hover{filter:brightness(1.08);}
+  .flag-emoji{font-size:1.4rem;}
+  .uni-count{margin-left:auto;font-size:.78rem;opacity:.85;}
+  .collapse-btn{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:.75rem;display:flex;align-items:center;justify-content:center;transition:transform .25s,background .15s;flex-shrink:0;}
+  .collapse-btn:hover{background:rgba(255,255,255,.35);}
+  .country-card-header.collapsed .collapse-btn{transform:rotate(-90deg);}
+  .country-card-body{padding:10px 0;overflow:hidden;transition:max-height .3s ease,opacity .25s ease;max-height:2000px;opacity:1;}
+  .country-card-body.collapsed{max-height:0;opacity:0;padding:0;}
+  .uni-row{padding:7px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f4f9;font-size:.82rem;}
+  .uni-row:last-child{border-bottom:none;}
+  .uni-name{flex:1;color:#333;font-weight:500;}
+  .status-pill{padding:2px 9px;border-radius:12px;font-size:.7rem;font-weight:700;white-space:nowrap;flex-shrink:0;}
+  .timer-mini{font-size:.68rem;font-weight:600;padding:2px 6px;border-radius:8px;flex-shrink:0;}
+  .s-not-contacted{background:#ecf0f1;color:#7f8c8d;}  .s-contacted{background:#d6eaf8;color:#1a5276;}
+  .s-awaiting{background:#fef9e7;color:#9a7d0a;}       .s-feedback{background:#d5f5e3;color:#1e7e45;}
+  .s-meeting{background:#e8daef;color:#6c3483;}         .s-followup{background:#fdebd0;color:#9c640c;}
+  .s-verbal{background:#d1f2eb;color:#0e6655;}          .s-pending{background:#fad7a0;color:#9c6400;}
+  .s-signed{background:#a9dfbf;color:#1d6a39;}          .s-active{background:#27ae60;color:#fff;}
+  .s-expired{background:#e74c3c;color:#fff;}
+  .timer-active{background:#d5f5e3;color:#1e7e45;}  .timer-warning{background:#fdebd0;color:#9c640c;}
+  .timer-expired{background:#fadbd8;color:#c0392b;}
+  .pipeline-section{padding:10px 28px 24px;}
+  .pipeline-section h2{font-size:.85rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;}
+  .pipeline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+  .pipeline-col{background:#fff;border-radius:10px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+  .pipeline-col-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #eee;}
+  .pipeline-item{font-size:.75rem;padding:4px 0;border-bottom:1px solid #f5f5f5;color:#444;}
+  .pipeline-item:last-child{border-bottom:none;}
+  .pipeline-count{font-size:1.3rem;font-weight:800;color:var(--sn-blue);}
+  .reports-wrap{padding:24px 28px;}
+  .reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+  .reports-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px;}
+  .reports-grid-full{margin-bottom:20px;}
+  .chart-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.07);}
+  .chart-card h3{font-size:.82rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+  .chart-card p.chart-sub{font-size:.75rem;color:#aaa;margin-bottom:16px;}
+  .chart-canvas-wrap{position:relative;}
+  .gauge-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
+  .gauge-center .gauge-num{font-size:1.6rem;font-weight:800;color:var(--sn-blue);line-height:1;}
+  .gauge-center .gauge-lbl{font-size:.65rem;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+  .report-insight{background:#f0f4f9;border-radius:8px;padding:12px 16px;font-size:.8rem;color:#555;margin-top:14px;border-left:4px solid var(--sn-blue);}
+  .report-insight strong{color:var(--sn-blue);}
+  .live-dot{display:inline-block;width:8px;height:8px;background:#27ae60;border-radius:50%;margin-right:6px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  footer{text-align:center;padding:20px;font-size:.75rem;color:#aaa;border-top:1px solid #e0e6ee;margin-top:10px;}
+  #no-data-msg{display:none;text-align:center;padding:60px 20px;color:#aaa;}
+  #no-data-msg h2{font-size:1.2rem;margin-bottom:8px;color:#bbb;}
+  @media(max-width:768px){
+    .stats-grid{padding:12px 14px;} .toolbar,.progress-section,.countries-section,.pipeline-section,.reports-wrap{padding-left:14px;padding-right:14px;}
+    header{padding:12px 14px;} .reports-grid,.reports-grid-3{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">SN</div>
+    <div>
+      <h1>University Partnerships — Europe</h1>
+      <p>StudyNow International Recruitment · Manager View</p>
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div class="badge-view">READ ONLY</div>
+    <div class="last-updated" id="last-updated" style="margin-top:6px"><span class="live-dot"></span>Live</div>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('tab-dashboard',this)">📊 Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('tab-universities',this)">🏛 Universities</button>
+  <button class="tab-btn" onclick="switchTab('tab-reports',this)">📈 Reports & Charts</button>
+</nav>
+
+<!-- DASHBOARD TAB -->
+<div id="tab-dashboard" class="tab-panel active">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="num" id="stat-total">—</div><div class="lbl">Total Universities</div></div>
+    <div class="stat-card gold"><div class="num" id="stat-contacted">—</div><div class="lbl">Contacted</div></div>
+    <div class="stat-card purple"><div class="num" id="stat-meetings">—</div><div class="lbl">Meetings Scheduled</div></div>
+    <div class="stat-card teal"><div class="num" id="stat-verbal">—</div><div class="lbl">Verbal Agreements</div></div>
+    <div class="stat-card"><div class="num" id="stat-pending">—</div><div class="lbl">Pending Contract</div></div>
+    <div class="stat-card green"><div class="num" id="stat-signed">—</div><div class="lbl">Contracts Signed</div></div>
+    <div class="stat-card red"><div class="num" id="stat-expiring">—</div><div class="lbl">Expiring ≤90 Days</div></div>
+    <div class="stat-card"><div class="num" id="stat-countries">7</div><div class="lbl">Countries</div></div>
+  </div>
+  <div class="progress-section">
+    <h2>Overall Progress by Status</h2>
+    <div id="progress-bars"></div>
+  </div>
+</div>
+
+<!-- UNIVERSITIES TAB -->
+<div id="tab-universities" class="tab-panel">
+  <div class="toolbar" style="padding-top:18px">
+    <input type="text" class="search-box" id="search-input" placeholder="🔍  Search university or country…" oninput="renderCountries()"/>
+    <select id="filter-country" onchange="renderCountries()">
+      <option value="">All Countries</option>
+      <option value="Lithuania">🇱🇹 Lithuania</option><option value="Romania">🇷🇴 Romania</option>
+      <option value="Latvia">🇱🇻 Latvia</option><option value="Luxembourg">🇱🇺 Luxembourg</option>
+      <option value="Czech Republic">🇨🇿 Czech Republic</option><option value="Belgium">🇧🇪 Belgium</option>
+      <option value="Ireland">🇮🇪 Ireland</option>
+    </select>
+    <select id="filter-status" onchange="renderCountries()">
+      <option value="">All Statuses</option>
+      <option>Not Contacted</option><option>Contacted</option><option>Awaiting Response</option>
+      <option>Feedback Received</option><option>Meeting Scheduled</option><option>Follow-up Needed</option>
+      <option>Verbal Agreement</option><option>Pending Contract</option><option>Contract Signed</option>
+      <option>Partnership Active</option><option>Partnership Expired</option>
+    </select>
+  </div>
+  <div class="countries-section" style="margin-top:18px">
+    <h2>Universities by Country</h2>
+    <div class="country-grid" id="country-grid"></div>
+  </div>
+  <div class="pipeline-section">
+    <h2>Partnership Pipeline</h2>
+    <div class="pipeline-grid" id="pipeline-grid"></div>
+  </div>
+</div>
+
+<!-- REPORTS TAB -->
+<div id="tab-reports" class="tab-panel">
+<div class="reports-wrap">
+  <div class="reports-grid">
+    <div class="chart-card"><h3>Overall Partnership Status</h3><p class="chart-sub">All universities by current stage</p><div class="chart-canvas-wrap" style="height:280px"><canvas id="chart-status-donut"></canvas></div><div class="report-insight" id="insight-status"></div></div>
+    <div class="chart-card"><h3>Progress by Country</h3><p class="chart-sub">Contacted vs Meetings vs Signed per country</p><div class="chart-canvas-wrap" style="height:280px"><canvas id="chart-country-grouped"></canvas></div><div class="report-insight" id="insight-country"></div></div>
+  </div>
+  <div class="reports-grid">
+    <div class="chart-card"><h3>Partnership Pipeline Funnel</h3><p class="chart-sub">Universities at each stage</p><div class="chart-canvas-wrap" style="height:300px"><canvas id="chart-pipeline-bar"></canvas></div></div>
+    <div class="chart-card"><h3>Status Breakdown by Country</h3><p class="chart-sub">Stacked view per country</p><div class="chart-canvas-wrap" style="height:300px"><canvas id="chart-stacked-country"></canvas></div></div>
+  </div>
+  <div class="reports-grid-3">
+    <div class="chart-card" style="text-align:center"><h3>Outreach Rate</h3><p class="chart-sub">% contacted</p><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-gauge-contacted"></canvas><div class="gauge-center"><div class="gauge-num" id="gauge-contacted-pct">—</div><div class="gauge-lbl">Contacted</div></div></div></div>
+    <div class="chart-card" style="text-align:center"><h3>Negotiation Rate</h3><p class="chart-sub">% verbal / pending</p><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-gauge-negotiation"></canvas><div class="gauge-center"><div class="gauge-num" id="gauge-negotiation-pct">—</div><div class="gauge-lbl">Negotiating</div></div></div></div>
+    <div class="chart-card" style="text-align:center"><h3>Conversion Rate</h3><p class="chart-sub">% signed</p><div class="chart-canvas-wrap" style="height:180px"><canvas id="chart-gauge-signed"></canvas><div class="gauge-center"><div class="gauge-num" id="gauge-signed-pct">—</div><div class="gauge-lbl">Signed</div></div></div></div>
+  </div>
+  <div class="reports-grid-full">
+    <div class="chart-card"><h3>Contract Portfolio Health</h3><p class="chart-sub">Active, expiring, expired and pending per country</p><div class="chart-canvas-wrap" style="height:220px"><canvas id="chart-contract-health"></canvas></div><div class="report-insight" id="insight-contracts"></div></div>
+  </div>
+</div>
+</div>
+
+<div id="no-data-msg">
+  <h2>No data yet</h2>
+  <p>Open <strong>admin.html</strong>, log in, and add university data to see it here.</p>
+</div>
+
+<footer>
+  StudyNow International Recruitment · Europe University Partnership Tracker · Manager View (Read Only)<br>
+  <span class="live-dot"></span> Live data — updates automatically. Last synced: <span id="footer-time">—</span>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════
+// SUPABASE CONFIG — must match admin.html
+// ═══════════════════════════════════════════
+const SB_URL = 'https://swottaalkgzuhlkchycb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3b3R0YWFsa2d6dWhsa2NoeWNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwODMwNDgsImV4cCI6MjA5NjY1OTA0OH0.VwgHUUrIpfTwYrxSL19sQV8sxbmKm-LMFMvCGauca2A';
+
+const sbH = () => ({'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`});
+
+async function sbGet() {
+  const r = await fetch(`${SB_URL}/rest/v1/universities?select=*&order=country.asc,name.asc`,{headers:sbH()});
+  if(!r.ok) throw new Error(await r.text());
+  return (await r.json()).map(fromDb);
+}
+
+function fromDb(d){return{id:d.id,name:d.name,country:d.country,status:d.status,contact:d.contact||'',dateContacted:d.date_contacted||'',lastContact:d.last_contact||'',meeting:d.meeting||'',followup:d.followup||'',verbal:d.verbal||'',signed:d.signed||'',contractStart:d.contract_start||'',contractEnd:d.contract_end||'',reminder:d.reminder||'',notes:d.notes||''};}
+
+let DATA = [];
+const collapsedCountries = new Set();
+
+const SOLID={'Lithuania':'#007A33','Romania':'#002B7F','Latvia':'#9E3039','Luxembourg':'#EF3340','Czech Republic':'#003DA5','Belgium':'#333','Ireland':'#169B62'};
+const FLAG={'Lithuania':'🇱🇹','Romania':'🇷🇴','Latvia':'🇱🇻','Luxembourg':'🇱🇺','Czech Republic':'🇨🇿','Belgium':'🇧🇪','Ireland':'🇮🇪'};
+const SCLS={'Not Contacted':'s-not-contacted','Contacted':'s-contacted','Awaiting Response':'s-awaiting','Feedback Received':'s-feedback','Meeting Scheduled':'s-meeting','Follow-up Needed':'s-followup','Verbal Agreement':'s-verbal','Pending Contract':'s-pending','Contract Signed':'s-signed','Partnership Active':'s-active','Partnership Expired':'s-expired'};
+const SCOLORS={'Not Contacted':'#bdc3c7','Contacted':'#3498db','Awaiting Response':'#f1c40f','Feedback Received':'#2ecc71','Meeting Scheduled':'#9b59b6','Follow-up Needed':'#e67e22','Verbal Agreement':'#1abc9c','Pending Contract':'#f39c12','Contract Signed':'#27ae60','Partnership Active':'#1e8449','Partnership Expired':'#e74c3c'};
+const CO=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland'];
+const SO=['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'];
+
+function cTimer(end){if(!end)return null;const t=new Date();t.setHours(0,0,0,0);const diff=Math.ceil((new Date(end)-t)/86400000);if(diff<0)return{cls:'timer-expired',label:'Expired'};if(diff<=90)return{cls:'timer-warning',label:`${diff}d left`};return{cls:'timer-active',label:`${Math.floor(diff/30)}m left`};}
+
+async function loadAndRender(){
+  try{
+    DATA=await sbGet();
+    document.getElementById('no-data-msg').style.display=DATA.length?'none':'block';
+    if(!DATA.length)return;
+    renderDashboard();
+    renderCountries();
+    if(document.getElementById('tab-reports').classList.contains('active'))renderCharts();
+    document.getElementById('last-updated').innerHTML=`<span class="live-dot"></span>Updated ${new Date().toLocaleTimeString()}`;
+    document.getElementById('footer-time').textContent=new Date().toLocaleString();
+  }catch(e){console.error('Supabase fetch error:',e);document.getElementById('last-updated').textContent='⚠ Connection error';}
+}
+
+function renderDashboard(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const contacted=DATA.filter(d=>d.dateContacted).length;
+  const meetings=DATA.filter(d=>d.status==='Meeting Scheduled').length;
+  const verbal=DATA.filter(d=>d.verbal||d.status==='Verbal Agreement').length;
+  const pending=DATA.filter(d=>d.status==='Pending Contract').length;
+  const signed=DATA.filter(d=>d.signed||d.status==='Contract Signed'||d.status==='Partnership Active').length;
+  const expiring=DATA.filter(d=>{if(!d.contractEnd)return false;const diff=Math.ceil((new Date(d.contractEnd)-today)/86400000);return diff>=0&&diff<=90;}).length;
+  document.getElementById('stat-total').textContent=DATA.length;
+  document.getElementById('stat-contacted').textContent=contacted;
+  document.getElementById('stat-meetings').textContent=meetings;
+  document.getElementById('stat-verbal').textContent=verbal;
+  document.getElementById('stat-pending').textContent=pending;
+  document.getElementById('stat-signed').textContent=signed;
+  document.getElementById('stat-expiring').textContent=expiring;
+  const sc={};DATA.forEach(d=>{sc[d.status]=(sc[d.status]||0)+1;});
+  let pbHtml='';
+  SO.forEach(s=>{const count=sc[s]||0;if(!count)return;const pct=Math.round(count/DATA.length*100);pbHtml+=`<div class="prog-row"><div class="prog-label">${s}</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:${pct}%;background:${SCOLORS[s]||'#ccc'}"></div></div><div class="prog-count">${count}</div></div>`;});
+  document.getElementById('progress-bars').innerHTML=pbHtml||'<div style="color:#aaa;font-size:.85rem">No data yet.</div>';
+}
+
+function toggleCountry(country,headerEl){
+  const card=headerEl.closest('.country-card');
+  const body=card.querySelector('.country-card-body');
+  const btn=headerEl.querySelector('.collapse-btn');
+  if(collapsedCountries.has(country)){collapsedCountries.delete(country);headerEl.classList.remove('collapsed');body.classList.remove('collapsed');btn.title='Collapse';}
+  else{collapsedCountries.add(country);headerEl.classList.add('collapsed');body.classList.add('collapsed');btn.title='Expand';}
+}
+
+function renderCountries(){
+  const q=(document.getElementById('search-input')||{value:''}).value.toLowerCase();
+  const fc=(document.getElementById('filter-country')||{value:''}).value;
+  const fs=(document.getElementById('filter-status')||{value:''}).value;
+  const filtered=DATA.filter(d=>(!q||d.name.toLowerCase().includes(q)||d.country.toLowerCase().includes(q))&&(!fc||d.country===fc)&&(!fs||d.status===fs));
+  const byC={};CO.forEach(c=>byC[c]=[]);filtered.forEach(d=>{if(byC[d.country])byC[d.country].push(d);});
+
+  // Pipeline
+  const pl={};SO.forEach(s=>pl[s]=[]);DATA.forEach(d=>{if(pl[d.status])pl[d.status].push(d.name);});
+  let plHtml='';SO.forEach(s=>{if(!pl[s].length)return;plHtml+=`<div class="pipeline-col"><div class="pipeline-col-title" style="color:${SCOLORS[s]};border-bottom-color:${SCOLORS[s]}">${s}</div><div class="pipeline-count">${pl[s].length}</div>${pl[s].map(n=>`<div class="pipeline-item">${n}</div>`).join('')}</div>`;});
+  const pgEl=document.getElementById('pipeline-grid');if(pgEl)pgEl.innerHTML=plHtml||'<div style="color:#aaa;font-size:.85rem;padding:10px">No data.</div>';
+
+  let html='';
+  CO.forEach(country=>{
+    const unis=byC[country];if(!unis||!unis.length)return;
+    const color=SOLID[country]||'#1a3c6e';const emoji=FLAG[country]||'';
+    const signed=unis.filter(u=>u.signed||u.status==='Contract Signed'||u.status==='Partnership Active').length;
+    const contacted=unis.filter(u=>u.dateContacted).length;
+    const isCollapsed=collapsedCountries.has(country);
+    html+=`<div class="country-card">
+      <div class="country-card-header${isCollapsed?' collapsed':''}" style="background:${color}" onclick="toggleCountry('${country}',this)">
+        <span class="flag-emoji">${emoji}</span><span>${country}</span>
+        <span class="uni-count">${unis.length} universities · ${signed} signed</span>
+        <button class="collapse-btn" title="${isCollapsed?'Expand':'Collapse'}">▼</button>
+      </div>
+      <div class="country-card-body${isCollapsed?' collapsed':''}">`;
+    unis.forEach(u=>{const sc=SCLS[u.status]||'s-not-contacted';const t=u.contractEnd?cTimer(u.contractEnd):null;html+=`<div class="uni-row"><div class="uni-name">${u.name}</div><span class="status-pill ${sc}">${u.status}</span>${t?`<span class="timer-mini ${t.cls}">${t.label}</span>`:''}</div>`;});
+    const pct=contacted?Math.round(contacted/unis.length*100):0;const spct=signed?Math.round(signed/unis.length*100):0;
+    html+=`<div style="padding:8px 16px 10px;border-top:1px solid #f0f4f9">
+      <div style="font-size:.7rem;color:#999;margin-bottom:4px">Contacted: ${contacted}/${unis.length}</div>
+      <div style="background:#e0e6ee;border-radius:10px;height:6px"><div style="background:${color};width:${pct}%;height:6px;border-radius:10px"></div></div>
+      ${signed?`<div style="font-size:.7rem;color:#999;margin-top:6px;margin-bottom:4px">Signed: ${signed}/${unis.length}</div><div style="background:#e0e6ee;border-radius:10px;height:6px"><div style="background:#27ae60;width:${spct}%;height:6px;border-radius:10px"></div></div>`:''}
+    </div></div></div>`;
+  });
+  const cgEl=document.getElementById('country-grid');if(cgEl)cgEl.innerHTML=html||'<div style="grid-column:1/-1;padding:20px;text-align:center;color:#aaa">No universities match your filters.</div>';
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
+  if(id==='tab-reports')renderCharts();
+}
+
+// CHARTS
+const CI={};
+function dC(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
+function gauge(id,pct,color){dC(id);const s=Math.min(100,Math.max(0,pct));CI[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{datasets:[{data:[s,100-s],backgroundColor:[color,'#eef2f7'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',rotation:-90,circumference:180,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:800}}});}
+
+function renderCharts(){
+  const data=DATA;if(!data.length)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const sc={};SO.forEach(s=>sc[s]=0);data.forEach(d=>{if(sc[d.status]!==undefined)sc[d.status]++;});
+  const dl=SO.filter(s=>sc[s]>0),dd=dl.map(s=>sc[s]),dc=dl.map(s=>SCOLORS[s]);
+  dC('chart-status-donut');CI['chart-status-donut']=new Chart(document.getElementById('chart-status-donut'),{type:'doughnut',data:{labels:dl,datasets:[{data:dd,backgroundColor:dc,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{cutout:'60%',plugins:{legend:{position:'right',labels:{font:{size:11},padding:10,boxWidth:12}},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/data.length*100)}%)`}}}}});
+  const top=dl[dd.indexOf(Math.max(...dd))];document.getElementById('insight-status').innerHTML=`<strong>${sc['Not Contacted']}</strong> not yet contacted · <strong>${(sc['Partnership Active']||0)+(sc['Contract Signed']||0)}</strong> active/signed · Largest group: <strong>${top}</strong>`;
+  const bc={};CO.forEach(c=>bc[c]={c:0,m:0,v:0,s:0,t:0});data.forEach(d=>{if(!bc[d.country])bc[d.country]={c:0,m:0,v:0,s:0,t:0};bc[d.country].t++;if(d.dateContacted)bc[d.country].c++;if(d.meeting||d.status==='Meeting Scheduled')bc[d.country].m++;if(d.verbal||d.status==='Verbal Agreement')bc[d.country].v++;if(d.signed||d.status==='Contract Signed'||d.status==='Partnership Active')bc[d.country].s++;});
+  const cl=CO.filter(c=>bc[c].t>0);dC('chart-country-grouped');CI['chart-country-grouped']=new Chart(document.getElementById('chart-country-grouped'),{type:'bar',data:{labels:cl,datasets:[{label:'Contacted',data:cl.map(c=>bc[c].c),backgroundColor:'#3498db',borderRadius:3},{label:'Meetings',data:cl.map(c=>bc[c].m),backgroundColor:'#9b59b6',borderRadius:3},{label:'Verbal/Pending',data:cl.map(c=>bc[c].v),backgroundColor:'#1abc9c',borderRadius:3},{label:'Signed',data:cl.map(c=>bc[c].s),backgroundColor:'#27ae60',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}}}}});
+  const lc=cl.reduce((b,c)=>bc[c].c>bc[b].c?c:b,cl[0]||'Lithuania');document.getElementById('insight-country').innerHTML=`<strong>${lc}</strong> leads with <strong>${bc[lc].c}</strong> contacts · <strong>${cl.filter(c=>bc[c].s>0).length}</strong> countries have signed`;
+  dC('chart-pipeline-bar');CI['chart-pipeline-bar']=new Chart(document.getElementById('chart-pipeline-bar'),{type:'bar',data:{labels:SO,datasets:[{label:'Universities',data:SO.map(s=>sc[s]||0),backgroundColor:SO.map(s=>SCOLORS[s]),borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} (${Math.round((ctx.raw||0)/data.length*100)}%)`}}},scales:{x:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  const sd=SO.filter(s=>sc[s]>0).map(s=>({label:s,data:CO.map(c=>data.filter(d=>d.country===c&&d.status===s).length),backgroundColor:SCOLORS[s],borderWidth:0,borderRadius:2}));dC('chart-stacked-country');CI['chart-stacked-country']=new Chart(document.getElementById('chart-stacked-country'),{type:'bar',data:{labels:CO,datasets:sd},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}}}}});
+  const tot=data.length,cp=Math.round(data.filter(d=>d.dateContacted).length/tot*100),np=Math.round(data.filter(d=>d.status==='Verbal Agreement'||d.status==='Pending Contract'||d.verbal).length/tot*100),sp=Math.round(data.filter(d=>d.signed||d.status==='Contract Signed'||d.status==='Partnership Active').length/tot*100);
+  gauge('chart-gauge-contacted',cp,'#3498db');gauge('chart-gauge-negotiation',np,'#1abc9c');gauge('chart-gauge-signed',sp,'#27ae60');
+  document.getElementById('gauge-contacted-pct').textContent=cp+'%';document.getElementById('gauge-negotiation-pct').textContent=np+'%';document.getElementById('gauge-signed-pct').textContent=sp+'%';
+  const hd=CO.map(c=>{const u=data.filter(d=>d.country===c);return{a:u.filter(d=>d.contractEnd&&Math.ceil((new Date(d.contractEnd)-today)/86400000)>90).length,e:u.filter(d=>d.contractEnd&&Math.ceil((new Date(d.contractEnd)-today)/86400000)>=0&&Math.ceil((new Date(d.contractEnd)-today)/86400000)<=90).length,x:u.filter(d=>d.contractEnd&&Math.ceil((new Date(d.contractEnd)-today)/86400000)<0).length,n:u.filter(d=>!d.contractEnd).length};});
+  dC('chart-contract-health');CI['chart-contract-health']=new Chart(document.getElementById('chart-contract-health'),{type:'bar',data:{labels:CO,datasets:[{label:'Active',data:hd.map(h=>h.a),backgroundColor:'#27ae60',borderRadius:3},{label:'Expiring ≤90d',data:hd.map(h=>h.e),backgroundColor:'#f39c12',borderRadius:3},{label:'Expired',data:hd.map(h=>h.x),backgroundColor:'#e74c3c',borderRadius:3},{label:'No Contract',data:hd.map(h=>h.n),backgroundColor:'#ecf0f1',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}}}}});
+  const te=hd.reduce((a,h)=>a+h.e,0),tx=hd.reduce((a,h)=>a+h.x,0);document.getElementById('insight-contracts').innerHTML=te+tx>0?`⚠️ <strong>${te}</strong> expiring ≤90d · <strong>${tx}</strong> expired · Action required`:`✅ All active contracts healthy`;
+}
+
+// Auto-refresh every 30 seconds
+loadAndRender();
+setInterval(loadAndRender, 30000);
+</script>
+</body>
+</html>
