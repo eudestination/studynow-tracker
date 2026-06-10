@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="StudyNow">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a3c6e">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon.svg">
+<title>StudyNow Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --blue: #1a3c6e;
+    --gold: #f5a623;
+    --light: #f2f4f8;
+    --card: #ffffff;
+    --text: #1c1c1e;
+    --sub: #6c6c70;
+    --border: #e5e5ea;
+    --green: #34c759;
+    --orange: #ff9500;
+    --red: #ff3b30;
+    --purple: #af52de;
+    --teal: #5ac8fa;
+    --safe-top: env(safe-area-inset-top, 44px);
+    --safe-bot: env(safe-area-inset-bottom, 20px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; background: var(--light); color: var(--text); }
+
+  /* SHELL */
+  #app { display: flex; flex-direction: column; height: 100%; }
+
+  /* STATUS BAR SPACER */
+  .status-bar { height: var(--safe-top); background: var(--blue); flex-shrink: 0; }
+
+  /* HEADER */
+  .app-header {
+    background: var(--blue); color: #fff;
+    padding: 12px 20px 16px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .app-header .header-row { display: flex; align-items: center; justify-content: space-between; }
+  .app-header h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.3px; }
+  .app-header .sub { font-size: 0.72rem; opacity: 0.65; margin-top: 1px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .icon-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; }
+  .icon-btn:active { background: rgba(255,255,255,0.3); }
+  .online-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* SEARCH BAR */
+  .search-wrap { background: var(--blue); padding: 0 16px 12px; flex-shrink: 0; }
+  .search-bar { background: rgba(255,255,255,0.15); border: none; border-radius: 12px; padding: 10px 14px 10px 36px; color: #fff; font-size: 0.9rem; width: 100%; outline: none; position: relative; }
+  .search-bar::placeholder { color: rgba(255,255,255,0.5); }
+  .search-wrap .search-icon { position: absolute; left: 28px; top: 50%; transform: translateY(-50%); opacity: 0.6; font-size: 0.9rem; pointer-events: none; }
+  .search-container { position: relative; }
+
+  /* SCROLL AREA */
+  .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
+
+  /* PULL TO REFRESH */
+  .ptr-indicator { text-align: center; padding: 14px; font-size: 0.8rem; color: var(--sub); opacity: 0; transition: opacity 0.2s; }
+  .ptr-indicator.visible { opacity: 1; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    display: flex; background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding-bottom: var(--safe-bot);
+    flex-shrink: 0; z-index: 100;
+  }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 4px 4px; cursor: pointer; border: none; background: none; color: var(--sub); gap: 3px; }
+  .nav-item .nav-icon { font-size: 1.35rem; transition: transform 0.15s; }
+  .nav-item .nav-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.02em; }
+  .nav-item.active { color: var(--blue); }
+  .nav-item.active .nav-icon { transform: scale(1.1); }
+
+  /* PAGES */
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  /* SECTION LABEL */
+  .section-label { font-size: 0.72rem; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; margin: 20px 0 8px 4px; }
+  .section-label:first-child { margin-top: 4px; }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+  .kpi-card { background: var(--card); border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .kpi-card .kpi-num { font-size: 1.9rem; font-weight: 800; line-height: 1; letter-spacing: -1px; }
+  .kpi-card .kpi-label { font-size: 0.72rem; color: var(--sub); margin-top: 4px; font-weight: 500; }
+  .kpi-card.blue .kpi-num { color: var(--blue); }
+  .kpi-card.gold .kpi-num { color: #b07800; }
+  .kpi-card.green .kpi-num { color: #1a7e35; }
+  .kpi-card.red .kpi-num { color: var(--red); }
+  .kpi-card.purple .kpi-num { color: #6c3483; }
+  .kpi-card.teal .kpi-num { color: #0077a8; }
+
+  /* PROGRESS BARS */
+  .prog-card { background: var(--card); border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .prog-row { margin-bottom: 12px; }
+  .prog-row:last-child { margin-bottom: 0; }
+  .prog-meta { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .prog-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+  .prog-count { font-size: 0.78rem; color: var(--sub); font-weight: 500; }
+  .prog-track { background: #e5e5ea; border-radius: 6px; height: 7px; }
+  .prog-fill { height: 7px; border-radius: 6px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+
+  /* COUNTRY SECTIONS */
+  .country-section { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 10px; }
+  .country-header { padding: 13px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+  .country-header:active { opacity: 0.8; }
+  .country-flag-emoji { font-size: 1.4rem; }
+  .country-name { font-size: 0.92rem; font-weight: 700; flex: 1; }
+  .country-meta { font-size: 0.72rem; color: rgba(255,255,255,0.8); }
+  .country-chevron { font-size: 0.8rem; color: rgba(255,255,255,0.7); transition: transform 0.25s; }
+  .country-chevron.open { transform: rotate(90deg); }
+  .country-body { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+  .country-body.open { max-height: 2000px; }
+
+  /* UNIVERSITY ROW */
+  .uni-row { padding: 11px 16px; display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); cursor: pointer; }
+  .uni-row:active { background: var(--light); }
+  .uni-info { flex: 1; min-width: 0; }
+  .uni-name { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .uni-contact { font-size: 0.7rem; color: var(--sub); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .status-pill-sm { padding: 3px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+
+  /* STATUS COLORS */
+  .st-not-contacted  { background: #e5e5ea; color: #636366; }
+  .st-contacted      { background: #d1e9ff; color: #004a99; }
+  .st-awaiting       { background: #fff4d1; color: #8a6a00; }
+  .st-feedback       { background: #d4f5e1; color: #1a7e35; }
+  .st-meeting        { background: #eaddff; color: #5e17a0; }
+  .st-followup       { background: #ffe5cc; color: #a04000; }
+  .st-verbal         { background: #ccf5ee; color: #0a6155; }
+  .st-pending        { background: #ffe0a0; color: #7a4e00; }
+  .st-signed         { background: #a8f0c0; color: #0f5c27; }
+  .st-active         { background: #34c759; color: #fff; }
+  .st-expired        { background: #ff3b30; color: #fff; }
+
+  /* DOT COLORS */
+  .dot-not-contacted { background: #c7c7cc; }
+  .dot-contacted     { background: #007aff; }
+  .dot-awaiting      { background: #ffcc00; }
+  .dot-feedback      { background: #34c759; }
+  .dot-meeting       { background: #af52de; }
+  .dot-followup      { background: #ff9500; }
+  .dot-verbal        { background: #5ac8fa; }
+  .dot-pending       { background: #ff9500; }
+  .dot-signed        { background: #34c759; }
+  .dot-active        { background: #34c759; }
+  .dot-expired       { background: #ff3b30; }
+
+  /* DETAIL SHEET */
+  .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .sheet-overlay.open { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-radius: 20px 20px 0 0; z-index: 201; transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); max-height: 90vh; overflow-y: auto; padding-bottom: var(--safe-bot); }
+  .sheet.open { transform: translateY(0); }
+  .sheet-handle { width: 36px; height: 4px; background: #d1d1d6; border-radius: 2px; margin: 12px auto 0; }
+  .sheet-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); }
+  .sheet-title { font-size: 1.05rem; font-weight: 700; }
+  .sheet-country { font-size: 0.78rem; color: var(--sub); margin-top: 3px; }
+  .sheet-body { padding: 16px 20px; }
+  .field-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { font-size: 0.78rem; color: var(--sub); font-weight: 500; }
+  .field-value { font-size: 0.82rem; font-weight: 600; color: var(--text); text-align: right; max-width: 55%; }
+  .field-value.empty { color: var(--sub); font-weight: 400; font-style: italic; }
+  .sheet-status-row { padding: 14px 0 8px; }
+  .status-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .status-option { padding: 9px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.15s; }
+  .status-option.selected { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(26,60,110,0.2); }
+  .status-option:active { transform: scale(0.97); }
+  .save-btn { width: 100%; background: var(--blue); color: #fff; border: none; border-radius: 14px; padding: 15px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 16px; }
+  .save-btn:active { background: #0f2a52; }
+  .save-btn.saving { background: #888; }
+  .notes-area { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 12px; font-size: 0.85rem; font-family: inherit; min-height: 80px; resize: vertical; margin-top: 8px; color: var(--text); background: var(--light); }
+  .notes-area:focus { outline: none; border-color: var(--blue); }
+
+  /* TIMER CHIPS */
+  .timer-chip { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 0.68rem; font-weight: 700; }
+  .tc-active  { background: #d4f5e1; color: #1a7e35; }
+  .tc-warning { background: #ffe0a0; color: #7a4e00; }
+  .tc-expired { background: #ffccca; color: #b0120a; }
+  .tc-none    { background: #e5e5ea; color: #888; }
+
+  /* CHARTS PAGE */
+  .chart-card { background: var(--card); border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 12px; }
+  .chart-card h3 { font-size: 0.78rem; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+  .chart-card .chart-sub { font-size: 0.72rem; color: #aaa; margin-bottom: 14px; }
+  .gauge-wrap { position: relative; display: flex; justify-content: center; }
+  .gauge-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%); text-align: center; }
+  .gauge-center .g-num { font-size: 1.5rem; font-weight: 800; color: var(--blue); line-height: 1; }
+  .gauge-center .g-lbl { font-size: 0.62rem; color: var(--sub); font-weight: 600; text-transform: uppercase; }
+  .gauges-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .gauge-mini-card { background: var(--card); border-radius: 14px; padding: 14px 8px 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); text-align: center; }
+  .gauge-mini-card h4 { font-size: 0.65rem; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+
+  /* ADMIN PIN */
+  .pin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .pin-overlay.open { opacity: 1; pointer-events: auto; }
+  .pin-box { background: var(--card); border-radius: 20px 20px 0 0; padding: 24px 28px 40px; width: 100%; max-width: 400px; }
+  .pin-box h3 { font-size: 1rem; font-weight: 700; text-align: center; margin-bottom: 6px; }
+  .pin-box p { font-size: 0.8rem; color: var(--sub); text-align: center; margin-bottom: 20px; }
+  .pin-input { width: 100%; border: 2px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 1rem; text-align: center; letter-spacing: 4px; font-weight: 700; }
+  .pin-input:focus { outline: none; border-color: var(--blue); }
+  .pin-btn { width: 100%; background: var(--blue); color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 12px; }
+  .pin-cancel { width: 100%; background: none; border: none; color: var(--sub); font-size: 0.9rem; cursor: pointer; margin-top: 10px; padding: 8px; }
+  .pin-error { color: var(--red); font-size: 0.8rem; text-align: center; margin-top: 8px; min-height: 20px; }
+
+  /* LOADING */
+  .loading-screen { position: fixed; inset: 0; background: var(--blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 16px; transition: opacity 0.4s; }
+  .loading-screen.hidden { opacity: 0; pointer-events: none; }
+  .loading-logo { width: 80px; height: 80px; background: var(--gold); border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: var(--blue); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+  .loading-title { color: #fff; font-size: 1.2rem; font-weight: 700; }
+  .loading-sub { color: rgba(255,255,255,0.6); font-size: 0.8rem; }
+  .loading-spinner { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* TOAST */
+  .toast { position: fixed; top: calc(var(--safe-top) + 60px); left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,0,0,0.85); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; z-index: 400; opacity: 0; transition: opacity 0.2s, transform 0.2s; white-space: nowrap; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--sub); }
+  .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .empty-state p { font-size: 0.82rem; line-height: 1.5; }
+
+  /* FILTER PILLS */
+  .filter-row { display: flex; gap: 8px; padding: 0 16px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-shrink: 0; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-pill { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; cursor: pointer; border: 1.5px solid var(--border); background: var(--card); color: var(--sub); flex-shrink: 0; }
+  .filter-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  /* REMINDERS BANNER */
+  .reminder-bar { background: #fff4d1; border-bottom: 1px solid #f0d060; padding: 10px 16px; display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #7a5000; flex-shrink: 0; }
+  .reminder-bar .r-close { margin-left: auto; font-size: 1rem; cursor: pointer; opacity: 0.6; }
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loading-screen">
+  <div class="loading-logo">SN</div>
+  <div class="loading-title">StudyNow</div>
+  <div class="loading-sub">Partnership Tracker</div>
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- APP SHELL -->
+<div id="app">
+  <div class="status-bar"></div>
+
+  <div class="app-header">
+    <div class="header-row">
+      <div>
+        <h1>StudyNow Tracker</h1>
+        <div class="sub"><span class="online-dot" id="online-dot"></span><span id="sync-label">Syncing…</span></div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="refreshData()" title="Refresh">↻</button>
+        <button class="icon-btn" id="admin-btn" onclick="checkAdmin()" title="Admin mode">✎</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMINDER BAR -->
+  <div class="reminder-bar" id="reminder-bar" style="display:none">
+    <span>🔔</span><span id="reminder-text"></span>
+    <span class="r-close" onclick="document.getElementById('reminder-bar').style.display='none'">✕</span>
+  </div>
+
+  <!-- FILTER PILLS (universities page) -->
+  <div class="filter-row" id="filter-row" style="display:none">
+    <div class="filter-pill active" onclick="setFilter('',this)">All</div>
+    <div class="filter-pill" onclick="setFilter('Not Contacted',this)">Not Contacted</div>
+    <div class="filter-pill" onclick="setFilter('Contacted',this)">Contacted</div>
+    <div class="filter-pill" onclick="setFilter('Meeting Scheduled',this)">Meeting</div>
+    <div class="filter-pill" onclick="setFilter('Verbal Agreement',this)">Verbal</div>
+    <div class="filter-pill" onclick="setFilter('Pending Contract',this)">Pending</div>
+    <div class="filter-pill" onclick="setFilter('Contract Signed',this)">Signed</div>
+    <div class="filter-pill" onclick="setFilter('Partnership Active',this)">Active</div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap" id="search-wrap" style="display:none">
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input class="search-bar" id="search-input" type="search" placeholder="Search universities…" oninput="renderUniversities()">
+    </div>
+  </div>
+
+  <div class="scroll-area" id="scroll-area">
+    <div class="ptr-indicator" id="ptr">↓ Pull to refresh</div>
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <div class="section-label">Overview</div>
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-num" id="k-total">—</div><div class="kpi-label">Universities</div></div>
+        <div class="kpi-card gold"><div class="kpi-num" id="k-contacted">—</div><div class="kpi-label">Contacted</div></div>
+        <div class="kpi-card purple"><div class="kpi-num" id="k-meetings">—</div><div class="kpi-label">Meetings</div></div>
+        <div class="kpi-card teal"><div class="kpi-num" id="k-verbal">—</div><div class="kpi-label">Verbal Agreements</div></div>
+        <div class="kpi-card green"><div class="kpi-num" id="k-signed">—</div><div class="kpi-label">Contracts Signed</div></div>
+        <div class="kpi-card red"><div class="kpi-num" id="k-expiring">—</div><div class="kpi-label">Expiring ≤90d</div></div>
+      </div>
+
+      <div class="section-label">Pipeline Progress</div>
+      <div class="prog-card" id="prog-card"></div>
+
+      <div class="section-label">Countries at a Glance</div>
+      <div id="country-summary"></div>
+
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- UNIVERSITIES PAGE -->
+    <div class="page" id="page-universities">
+      <div id="uni-list"></div>
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- REPORTS PAGE -->
+    <div class="page" id="page-reports">
+      <div class="section-label">Status Distribution</div>
+      <div class="chart-card">
+        <h3>Partnership Status</h3><p class="chart-sub">All universities by current stage</p>
+        <canvas id="chart-donut" height="220"></canvas>
+      </div>
+
+      <div class="section-label">Key Metrics</div>
+      <div class="gauges-row">
+        <div class="gauge-mini-card">
+          <h4>Outreach</h4>
+          <div class="gauge-wrap" style="height:90px">
+            <canvas id="g-contacted"></canvas>
+            <div class="gauge-center"><div class="g-num" id="gn-contacted">—</div><div class="g-lbl">contacted</div></div>
+          </div>
+        </div>
+        <div class="gauge-mini-card">
+          <h4>Negotiation</h4>
+          <div class="gauge-wrap" style="height:90px">
+            <canvas id="g-nego"></canvas>
+            <div class="gauge-center"><div class="g-num" id="gn-nego">—</div><div class="g-lbl">negotiating</div></div>
+          </div>
+        </div>
+        <div class="gauge-mini-card">
+          <h4>Conversion</h4>
+          <div class="gauge-wrap" style="height:90px">
+            <canvas id="g-signed"></canvas>
+            <div class="gauge-center"><div class="g-num" id="gn-signed">—</div><div class="g-lbl">signed</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Progress by Country</div>
+      <div class="chart-card">
+        <h3>Country Comparison</h3><p class="chart-sub">Contacted · Meetings · Signed</p>
+        <canvas id="chart-country" height="260"></canvas>
+      </div>
+
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-item" id="nav-universities" onclick="showPage('universities')">
+      <span class="nav-icon">🏛</span><span class="nav-label">Universities</span>
+    </button>
+    <button class="nav-item" id="nav-reports" onclick="showPage('reports')">
+      <span class="nav-icon">📈</span><span class="nav-label">Reports</span>
+    </button>
+  </nav>
+</div>
+
+<!-- UNIVERSITY DETAIL SHEET -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()"></div>
+<div class="sheet" id="detail-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="sheet-title">University</div>
+    <div class="sheet-country" id="sheet-country"></div>
+  </div>
+  <div class="sheet-body" id="sheet-body"></div>
+</div>
+
+<!-- ADMIN PIN -->
+<div class="pin-overlay" id="pin-overlay">
+  <div class="pin-box">
+    <h3>🔐 Admin Access</h3>
+    <p>Enter your password to edit university data</p>
+    <input type="password" class="pin-input" id="pin-input" placeholder="Password" autocomplete="current-password"/>
+    <div class="pin-error" id="pin-error"></div>
+    <button class="pin-btn" onclick="submitPin()">Unlock Editing</button>
+    <button class="pin-cancel" onclick="closePinOverlay()">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════
+const SB_URL = 'https://swottaalkgzuhlkchycb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3b3R0YWFsa2d6dWhsa2NoeWNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwODMwNDgsImV4cCI6MjA5NjY1OTA0OH0.VwgHUUrIpfTwYrxSL19sQV8sxbmKm-LMFMvCGauca2A';
+const ADMIN_PASS = 'StudyNow@2024!';
+
+const sbH = () => ({'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'});
+async function sbGet(){const r=await fetch(`${SB_URL}/rest/v1/universities?select=*&order=country.asc,name.asc`,{headers:sbH()});if(!r.ok)throw new Error(await r.text());return(await r.json()).map(fromDb);}
+async function sbPatch(id,fields){const r=await fetch(`${SB_URL}/rest/v1/universities?id=eq.${encodeURIComponent(id)}`,{method:'PATCH',headers:{...sbH(),'Prefer':'return=minimal'},body:JSON.stringify(fields)});if(!r.ok)throw new Error(await r.text());}
+function fromDb(d){return{id:d.id,name:d.name,country:d.country,status:d.status,contact:d.contact||'',dateContacted:d.date_contacted||'',lastContact:d.last_contact||'',meeting:d.meeting||'',followup:d.followup||'',verbal:d.verbal||'',signed:d.signed||'',contractStart:d.contract_start||'',contractEnd:d.contract_end||'',reminder:d.reminder||'',notes:d.notes||''};}
+
+// ═══ STATE ═══
+let DATA = [], isAdmin = false, currentFilter = '', sheetId = null;
+const CI = {};
+
+const COUNTRIES = ['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland'];
+const FLAG = {'Lithuania':'🇱🇹','Romania':'🇷🇴','Latvia':'🇱🇻','Luxembourg':'🇱🇺','Czech Republic':'🇨🇿','Belgium':'🇧🇪','Ireland':'🇮🇪'};
+const SOLID = {'Lithuania':'#007A33','Romania':'#002B7F','Latvia':'#9E3039','Luxembourg':'#EF3340','Czech Republic':'#003DA5','Belgium':'#333','Ireland':'#169B62'};
+const STATUS_CLS = {'Not Contacted':'st-not-contacted','Contacted':'st-contacted','Awaiting Response':'st-awaiting','Feedback Received':'st-feedback','Meeting Scheduled':'st-meeting','Follow-up Needed':'st-followup','Verbal Agreement':'st-verbal','Pending Contract':'st-pending','Contract Signed':'st-signed','Partnership Active':'st-active','Partnership Expired':'st-expired'};
+const DOT_CLS = {'Not Contacted':'dot-not-contacted','Contacted':'dot-contacted','Awaiting Response':'dot-awaiting','Feedback Received':'dot-feedback','Meeting Scheduled':'dot-meeting','Follow-up Needed':'dot-followup','Verbal Agreement':'dot-verbal','Pending Contract':'dot-pending','Contract Signed':'dot-signed','Partnership Active':'dot-active','Partnership Expired':'dot-expired'};
+const STATUS_COLORS = {'Not Contacted':'#c7c7cc','Contacted':'#007aff','Awaiting Response':'#ffcc00','Feedback Received':'#34c759','Meeting Scheduled':'#af52de','Follow-up Needed':'#ff9500','Verbal Agreement':'#5ac8fa','Pending Contract':'#ff9500','Contract Signed':'#34c759','Partnership Active':'#1a7e35','Partnership Expired':'#ff3b30'};
+const STATUSES = ['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'];
+
+// ═══ INIT ═══
+async function init() {
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  try {
+    DATA = await sbGet();
+    renderAll();
+    setSynced();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('sync-label').textContent = '⚠ Offline';
+  }
+  document.getElementById('loading-screen').classList.add('hidden');
+  setTimeout(() => document.getElementById('loading-screen').remove(), 500);
+  checkReminders();
+  setInterval(refreshData, 60000);
+}
+
+async function refreshData() {
+  try {
+    DATA = await sbGet();
+    renderAll();
+    setSynced();
+    if (document.getElementById('page-reports').classList.contains('active')) renderCharts();
+  } catch(e) { document.getElementById('sync-label').textContent = '⚠ Offline'; }
+}
+
+function setSynced() {
+  const t = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('sync-label').textContent = `Updated ${t}`;
+}
+
+// ═══ PAGES ═══
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+  const showSearch = name === 'universities';
+  document.getElementById('search-wrap').style.display = showSearch ? 'block' : 'none';
+  document.getElementById('filter-row').style.display = showSearch ? 'flex' : 'none';
+  if (name === 'reports') renderCharts();
+  if (name === 'universities') renderUniversities();
+  document.getElementById('scroll-area').scrollTop = 0;
+}
+
+// ═══ RENDER ALL ═══
+function renderAll() { renderDashboard(); renderUniversities(); }
+
+// ═══ DASHBOARD ═══
+function renderDashboard() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const contacted = DATA.filter(d=>d.dateContacted).length;
+  const meetings = DATA.filter(d=>d.status==='Meeting Scheduled').length;
+  const verbal = DATA.filter(d=>d.verbal||d.status==='Verbal Agreement').length;
+  const signed = DATA.filter(d=>d.signed||d.status==='Contract Signed'||d.status==='Partnership Active').length;
+  const expiring = DATA.filter(d=>{if(!d.contractEnd)return false;return Math.ceil((new Date(d.contractEnd)-today)/86400000)<=90&&Math.ceil((new Date(d.contractEnd)-today)/86400000)>=0;}).length;
+  document.getElementById('k-total').textContent = DATA.length;
+  document.getElementById('k-contacted').textContent = contacted;
+  document.getElementById('k-meetings').textContent = meetings;
+  document.getElementById('k-verbal').textContent = verbal;
+  document.getElementById('k-signed').textContent = signed;
+  document.getElementById('k-expiring').textContent = expiring;
+
+  // Progress bars
+  const sc = {}; STATUSES.forEach(s=>sc[s]=0); DATA.forEach(d=>{if(sc[d.status]!==undefined)sc[d.status]++;});
+  let pbHtml = '';
+  STATUSES.forEach(s => {
+    const c = sc[s]; if(!c) return;
+    const pct = Math.round(c/DATA.length*100);
+    pbHtml += `<div class="prog-row">
+      <div class="prog-meta"><span class="prog-name">${s}</span><span class="prog-count">${c}</span></div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${STATUS_COLORS[s]}"></div></div>
+    </div>`;
+  });
+  document.getElementById('prog-card').innerHTML = pbHtml;
+
+  // Country summary
+  let csHtml = '';
+  COUNTRIES.forEach(country => {
+    const unis = DATA.filter(d=>d.country===country);
+    if(!unis.length) return;
+    const done = unis.filter(u=>u.signed||u.status==='Contract Signed'||u.status==='Partnership Active').length;
+    const pct = Math.round(unis.filter(u=>u.dateContacted).length/unis.length*100);
+    csHtml += `<div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:1.3rem">${FLAG[country]||''}</span>
+        <span style="font-size:.88rem;font-weight:700;flex:1">${country}</span>
+        <span style="font-size:.72rem;color:#888">${unis.length} unis · ${done} signed</span>
+      </div>
+      <div style="background:#e5e5ea;border-radius:6px;height:6px">
+        <div style="background:${SOLID[country]};width:${pct}%;height:6px;border-radius:6px;transition:width .6s"></div>
+      </div>
+      <div style="font-size:.68rem;color:#888;margin-top:4px">${pct}% contacted</div>
+    </div>`;
+  });
+  document.getElementById('country-summary').innerHTML = csHtml;
+}
+
+// ═══ UNIVERSITIES LIST ═══
+function renderUniversities() {
+  const q = (document.getElementById('search-input').value||'').toLowerCase();
+  const filtered = DATA.filter(d =>
+    (!q || d.name.toLowerCase().includes(q) || d.country.toLowerCase().includes(q)) &&
+    (!currentFilter || d.status === currentFilter)
+  );
+
+  if (!filtered.length) {
+    document.getElementById('uni-list').innerHTML = `<div class="empty-state"><div class="emoji">🔍</div><h3>No results</h3><p>Try a different search or filter</p></div>`;
+    return;
+  }
+
+  // Group by country
+  const byCountry = {}; COUNTRIES.forEach(c=>byCountry[c]=[]);
+  filtered.forEach(d=>{if(byCountry[d.country])byCountry[d.country].push(d);});
+
+  let html = '';
+  COUNTRIES.forEach(country => {
+    const unis = byCountry[country]; if(!unis.length) return;
+    const color = SOLID[country];
+    html += `<div class="country-section">
+      <div class="country-header" style="background:${color}" onclick="toggleCountrySection(this)">
+        <span class="country-flag-emoji">${FLAG[country]||''}</span>
+        <span class="country-name" style="color:#fff">${country}</span>
+        <span class="country-meta">${unis.length}</span>
+        <span class="country-chevron open">›</span>
+      </div>
+      <div class="country-body open">`;
+    unis.forEach(u => {
+      const dc = DOT_CLS[u.status]||'dot-not-contacted';
+      const sc = STATUS_CLS[u.status]||'st-not-contacted';
+      html += `<div class="uni-row" onclick="openSheet('${u.id}')">
+        <div class="status-dot ${dc}"></div>
+        <div class="uni-info">
+          <div class="uni-name">${u.name}</div>
+          ${u.contact?`<div class="uni-contact">${u.contact}</div>`:''}
+        </div>
+        <span class="status-pill-sm ${sc}">${u.status}</span>
+        <span style="color:#c7c7cc;font-size:1rem;margin-left:2px">›</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById('uni-list').innerHTML = html;
+}
+
+function toggleCountrySection(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.country-chevron');
+  body.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+function setFilter(val, el) {
+  currentFilter = val;
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderUniversities();
+}
+
+// ═══ DETAIL SHEET ═══
+function openSheet(id) {
+  const u = DATA.find(d=>d.id===id); if(!u) return;
+  sheetId = id;
+  document.getElementById('sheet-title').textContent = u.name;
+  document.getElementById('sheet-country').textContent = `${FLAG[u.country]||''} ${u.country}`;
+
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : null;
+  const timerHtml = contractTimer(u.contractEnd);
+
+  let body = `<div class="sheet-status-row">
+    <div style="font-size:.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Current Status</div>
+    <div class="status-select-grid" id="status-grid">`;
+  STATUSES.forEach(s => {
+    const sc = STATUS_CLS[s]||'st-not-contacted';
+    body += `<div class="status-option ${sc}${u.status===s?' selected':''}" onclick="selectStatus('${s}',this)">${s}</div>`;
+  });
+  body += `</div></div>`;
+
+  body += `<div style="border-top:1px solid var(--border);margin:8px 0"></div>`;
+
+  const fields = [
+    ['Date Contacted', fmtDate(u.dateContacted)],
+    ['Last Contact', fmtDate(u.lastContact)],
+    ['Contact Person', u.contact],
+    ['Meeting Date', fmtDate(u.meeting)],
+    ['Follow-up Date', fmtDate(u.followup)],
+    ['Verbal Agreement', fmtDate(u.verbal)],
+    ['Contract Signed', fmtDate(u.signed)],
+    ['Contract Start', fmtDate(u.contractStart)],
+    ['Contract End', fmtDate(u.contractEnd)],
+    ['Contract Validity', timerHtml],
+    ['Reminder', fmtDate(u.reminder)],
+  ];
+  fields.forEach(([label, val]) => {
+    body += `<div class="field-row">
+      <span class="field-label">${label}</span>
+      <span class="field-value${!val?' empty':''}">${val||'Not set'}</span>
+    </div>`;
+  });
+
+  if (u.notes) {
+    body += `<div style="margin-top:12px"><div style="font-size:.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Notes</div><div style="font-size:.82rem;color:var(--text);line-height:1.5;background:var(--light);border-radius:10px;padding:10px 12px">${u.notes}</div></div>`;
+  }
+
+  if (isAdmin) {
+    body += `<div style="margin-top:16px"><div style="font-size:.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Notes</div><textarea class="notes-area" id="sheet-notes" placeholder="Add notes…">${u.notes||''}</textarea></div>`;
+    body += `<button class="save-btn" id="save-btn" onclick="saveSheet()">Save Changes</button>`;
+  }
+
+  document.getElementById('sheet-body').innerHTML = body;
+  document.getElementById('sheet-overlay').classList.add('open');
+  document.getElementById('detail-sheet').classList.add('open');
+}
+
+function closeSheet() {
+  document.getElementById('sheet-overlay').classList.remove('open');
+  document.getElementById('detail-sheet').classList.remove('open');
+  sheetId = null;
+}
+
+let selectedStatus = null;
+function selectStatus(s, el) {
+  if (!isAdmin) { showToast('Enable admin mode to edit'); return; }
+  selectedStatus = s;
+  document.querySelectorAll('.status-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function saveSheet() {
+  if (!isAdmin || !sheetId) return;
+  const u = DATA.find(d=>d.id===sheetId); if(!u) return;
+  const newStatus = selectedStatus || u.status;
+  const newNotes = document.getElementById('sheet-notes')?.value ?? u.notes;
+  const btn = document.getElementById('save-btn');
+  btn.textContent = 'Saving…'; btn.classList.add('saving');
+  try {
+    await sbPatch(sheetId, { status: newStatus, notes: newNotes });
+    u.status = newStatus; u.notes = newNotes;
+    selectedStatus = null;
+    btn.textContent = '✓ Saved!'; btn.style.background = '#34c759';
+    setTimeout(() => { closeSheet(); renderAll(); }, 800);
+    showToast('✓ Saved');
+  } catch(e) {
+    btn.textContent = '⚠ Failed'; btn.style.background = '#ff3b30';
+    setTimeout(() => { btn.textContent='Save Changes'; btn.className='save-btn'; btn.style.background=''; }, 2000);
+  }
+}
+
+// ═══ CONTRACT TIMER ═══
+function contractTimer(end) {
+  if(!end) return '<span class="timer-chip tc-none">—</span>';
+  const today=new Date();today.setHours(0,0,0,0);
+  const diff=Math.ceil((new Date(end)-today)/86400000);
+  if(diff<0) return `<span class="timer-chip tc-expired">Expired ${Math.abs(diff)}d ago</span>`;
+  if(diff<=90) return `<span class="timer-chip tc-warning">${diff} days left</span>`;
+  return `<span class="timer-chip tc-active">${Math.floor(diff/30)}m ${diff%30}d left</span>`;
+}
+
+// ═══ ADMIN MODE ═══
+function checkAdmin() {
+  if (isAdmin) {
+    isAdmin = false;
+    document.getElementById('admin-btn').textContent = '✎';
+    document.getElementById('admin-btn').style.background = 'rgba(255,255,255,0.15)';
+    showToast('Admin mode off');
+    return;
+  }
+  document.getElementById('pin-overlay').classList.add('open');
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').textContent = '';
+  setTimeout(() => document.getElementById('pin-input').focus(), 300);
+}
+
+function submitPin() {
+  const val = document.getElementById('pin-input').value;
+  if (val === ADMIN_PASS) {
+    isAdmin = true;
+    closePinOverlay();
+    document.getElementById('admin-btn').textContent = '✓';
+    document.getElementById('admin-btn').style.background = 'rgba(245,166,35,0.8)';
+    showToast('✓ Admin mode on — tap any university to edit');
+  } else {
+    document.getElementById('pin-error').textContent = 'Incorrect password';
+    document.getElementById('pin-input').value = '';
+  }
+}
+
+function closePinOverlay() {
+  document.getElementById('pin-overlay').classList.remove('open');
+}
+
+document.getElementById('pin-input').addEventListener('keydown', e => { if(e.key==='Enter') submitPin(); });
+
+// ═══ REMINDERS ═══
+function checkReminders() {
+  const today = new Date().toISOString().split('T')[0];
+  const due = DATA.filter(d => d.reminder && d.reminder <= today);
+  if (due.length) {
+    document.getElementById('reminder-text').textContent = `${due.length} reminder(s) due: ${due.slice(0,2).map(d=>d.name).join(', ')}${due.length>2?` +${due.length-2} more`:''}`;
+    document.getElementById('reminder-bar').style.display = 'flex';
+  }
+}
+
+// ═══ TOAST ═══
+let _toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══ CHARTS ═══
+function dC(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
+function mkGauge(id,pct,color){dC(id);const s=Math.min(100,Math.max(0,pct));CI[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{datasets:[{data:[s,100-s],backgroundColor:[color,'#e5e5ea'],borderWidth:0}]},options:{cutout:'70%',rotation:-90,circumference:180,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:600}}});}
+
+function renderCharts() {
+  if (!DATA.length) return;
+  const sc = {}; STATUSES.forEach(s=>sc[s]=0); DATA.forEach(d=>{if(sc[d.status]!==undefined)sc[d.status]++;});
+  const dl = STATUSES.filter(s=>sc[s]>0);
+
+  // Donut
+  dC('chart-donut');
+  CI['chart-donut'] = new Chart(document.getElementById('chart-donut'), {
+    type:'doughnut',
+    data:{labels:dl,datasets:[{data:dl.map(s=>sc[s]),backgroundColor:dl.map(s=>STATUS_COLORS[s]),borderWidth:2,borderColor:'#f2f4f8',hoverOffset:4}]},
+    options:{cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8,boxWidth:10}}},animation:{duration:600}}
+  });
+
+  // Gauges
+  const tot = DATA.length;
+  const cp = Math.round(DATA.filter(d=>d.dateContacted).length/tot*100);
+  const np = Math.round(DATA.filter(d=>d.status==='Verbal Agreement'||d.status==='Pending Contract'||d.verbal).length/tot*100);
+  const sp = Math.round(DATA.filter(d=>d.signed||d.status==='Contract Signed'||d.status==='Partnership Active').length/tot*100);
+  mkGauge('g-contacted',cp,'#007aff'); mkGauge('g-nego',np,'#5ac8fa'); mkGauge('g-signed',sp,'#34c759');
+  document.getElementById('gn-contacted').textContent = cp+'%';
+  document.getElementById('gn-nego').textContent = np+'%';
+  document.getElementById('gn-signed').textContent = sp+'%';
+
+  // Country bar
+  const bc = {}; COUNTRIES.forEach(c=>bc[c]={c:0,m:0,s:0,t:0});
+  DATA.forEach(d=>{if(bc[d.country]){bc[d.country].t++;if(d.dateContacted)bc[d.country].c++;if(d.meeting||d.status==='Meeting Scheduled')bc[d.country].m++;if(d.signed||d.status==='Contract Signed'||d.status==='Partnership Active')bc[d.country].s++;}});
+  const cl = COUNTRIES.filter(c=>bc[c].t>0);
+  dC('chart-country');
+  CI['chart-country'] = new Chart(document.getElementById('chart-country'),{
+    type:'bar',
+    data:{labels:cl,datasets:[
+      {label:'Contacted',data:cl.map(c=>bc[c].c),backgroundColor:'#007aff',borderRadius:3},
+      {label:'Meetings',data:cl.map(c=>bc[c].m),backgroundColor:'#af52de',borderRadius:3},
+      {label:'Signed',data:cl.map(c=>bc[c].s),backgroundColor:'#34c759',borderRadius:3},
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10,padding:8}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}}},animation:{duration:600}}
+  });
+}
+
+// ═══ START ═══
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
