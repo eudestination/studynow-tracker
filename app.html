@@ -216,6 +216,28 @@
   .pin-cancel { width: 100%; background: none; border: none; color: var(--sub); font-size: 0.9rem; cursor: pointer; margin-top: 10px; padding: 8px; }
   .pin-error { color: var(--red); font-size: 0.8rem; text-align: center; margin-top: 8px; min-height: 20px; }
 
+  /* SWIPE BACK */
+  .swipe-back-overlay {
+    position: fixed; inset: 0; z-index: 90;
+    pointer-events: none; background: transparent;
+  }
+  .swipe-shadow {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 80px;
+    background: linear-gradient(to right, rgba(0,0,0,0.18), transparent);
+    z-index: 91; opacity: 0; pointer-events: none; transition: opacity 0.1s;
+  }
+  /* Page slide transition */
+  .page-sliding { will-change: transform, opacity; }
+  /* Back button in header */
+  .back-btn {
+    background: rgba(255,255,255,0.15); border: none; color: #fff;
+    border-radius: 50%; width: 34px; height: 34px;
+    display: none; align-items: center; justify-content: center;
+    font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+  }
+  .back-btn.visible { display: flex; }
+  .back-btn:active { background: rgba(255,255,255,0.3); }
+
   /* LOADING */
   .loading-screen { position: fixed; inset: 0; background: var(--blue); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 16px; transition: opacity 0.4s; }
   .loading-screen.hidden { opacity: 0; pointer-events: none; }
@@ -265,8 +287,9 @@
 
   <div class="app-header">
     <div class="header-row">
-      <div>
-        <h1>StudyNow Tracker</h1>
+      <button class="back-btn" id="back-btn" onclick="goBack()">‹</button>
+      <div style="flex:1">
+        <h1 id="page-title">StudyNow Tracker</h1>
         <div class="sub"><span class="online-dot" id="online-dot"></span><span id="sync-label">Syncing…</span></div>
       </div>
       <div class="header-actions">
@@ -412,6 +435,8 @@
   </div>
 </div>
 
+<div class="swipe-shadow" id="swipe-shadow"></div>
+
 <script>
 // ═══════════════════════════════════
 // SUPABASE CONFIG
@@ -468,18 +493,77 @@ function setSynced() {
   document.getElementById('sync-label').textContent = `Updated ${t}`;
 }
 
+// ═══ NAVIGATION HISTORY STACK ═══
+const _navStack = ['dashboard'];
+
+function getCurrentPage() {
+  return _navStack[_navStack.length - 1];
+}
+
+function updateBackBtn() {
+  const btn = document.getElementById('back-btn');
+  const sheetOpen = document.getElementById('detail-sheet').classList.contains('open');
+  const hasPrev = _navStack.length > 1;
+  if (sheetOpen || hasPrev) {
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+}
+
+function goBack() {
+  // If sheet is open, close it first
+  if (document.getElementById('detail-sheet').classList.contains('open')) {
+    closeSheet();
+    return;
+  }
+  // Otherwise pop the nav stack
+  if (_navStack.length > 1) {
+    _navStack.pop();
+    const prev = _navStack[_navStack.length - 1];
+    _showPageInternal(prev, false);
+  }
+}
+
 // ═══ PAGES ═══
 function showPage(name) {
+  if (name === getCurrentPage()) return;
+  _navStack.push(name);
+  _showPageInternal(name, true);
+}
+
+function _showPageInternal(name, slideIn) {
+  const scrollArea = document.getElementById('scroll-area');
+
+  // Animate slide if coming from a swipe or tab tap
+  if (slideIn) {
+    scrollArea.style.transition = 'none';
+    scrollArea.style.transform = 'translateX(30px)';
+    scrollArea.style.opacity = '0';
+    requestAnimationFrame(() => {
+      scrollArea.style.transition = 'transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.2s';
+      scrollArea.style.transform = '';
+      scrollArea.style.opacity = '';
+      setTimeout(() => { scrollArea.style.transition = ''; }, 250);
+    });
+  }
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById(`page-${name}`).classList.add('active');
   document.getElementById(`nav-${name}`).classList.add('active');
+
+  const titles = { dashboard: 'StudyNow Tracker', universities: 'Universities', reports: 'Reports' };
+  document.getElementById('page-title').textContent = titles[name] || 'StudyNow';
+
   const showSearch = name === 'universities';
   document.getElementById('search-wrap').style.display = showSearch ? 'block' : 'none';
   document.getElementById('filter-row').style.display = showSearch ? 'flex' : 'none';
+
   if (name === 'reports') renderCharts();
   if (name === 'universities') renderUniversities();
-  document.getElementById('scroll-area').scrollTop = 0;
+  scrollArea.scrollTop = 0;
+  updateBackBtn();
 }
 
 // ═══ RENDER ALL ═══
@@ -649,12 +733,21 @@ function openSheet(id) {
   document.getElementById('sheet-body').innerHTML = body;
   document.getElementById('sheet-overlay').classList.add('open');
   document.getElementById('detail-sheet').classList.add('open');
+  updateBackBtn();
 }
 
 function closeSheet() {
-  document.getElementById('sheet-overlay').classList.remove('open');
-  document.getElementById('detail-sheet').classList.remove('open');
-  sheetId = null;
+  const sheet = document.getElementById('detail-sheet');
+  sheet.style.transition = 'transform 0.28s cubic-bezier(.4,0,.2,1)';
+  sheet.style.transform = 'translateY(100%)';
+  setTimeout(() => {
+    sheet.style.transition = '';
+    sheet.style.transform = '';
+    document.getElementById('sheet-overlay').classList.remove('open');
+    sheet.classList.remove('open');
+    sheetId = null;
+    updateBackBtn();
+  }, 280);
 }
 
 let selectedStatus = null;
@@ -791,6 +884,143 @@ function renderCharts() {
     options:{responsive:true,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10,padding:8}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0f0f0'}}},animation:{duration:600}}
   });
 }
+
+// ═══ SWIPE BACK GESTURE ═══
+(function() {
+  const EDGE_WIDTH = 28;      // px from left edge that activates the gesture
+  const TRIGGER_DIST = 72;    // px drag needed to confirm back navigation
+  const SHEET_TRIGGER = 80;   // px drag down needed to dismiss sheet
+
+  let startX = 0, startY = 0;
+  let tracking = false;        // edge swipe for page back
+  let trackingSheet = false;   // swipe-down for sheet dismiss
+  let dragging = false;
+  let sheetStartY = 0;
+
+  const scrollArea  = () => document.getElementById('scroll-area');
+  const shadow      = () => document.getElementById('swipe-shadow');
+  const sheet       = () => document.getElementById('detail-sheet');
+  const sheetOpen   = () => sheet().classList.contains('open');
+
+  function canGoBack() {
+    return sheetOpen() || _navStack.length > 1;
+  }
+
+  document.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    dragging = false;
+
+    // Sheet swipe-down: finger starts on the sheet handle area
+    if (sheetOpen() && startY < sheet().getBoundingClientRect().top + 60) {
+      trackingSheet = true;
+      sheetStartY = startY;
+      tracking = false;
+      return;
+    }
+    trackingSheet = false;
+
+    // Edge swipe back: finger starts within EDGE_WIDTH of left edge
+    tracking = startX <= EDGE_WIDTH && canGoBack();
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!tracking && !trackingSheet) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    // ── Sheet swipe-down ──
+    if (trackingSheet) {
+      if (dy < 0) { trackingSheet = false; return; }
+      dragging = true;
+      const progress = Math.min(dy, 300);
+      sheet().style.transition = 'none';
+      sheet().style.transform = `translateY(${progress}px)`;
+      shadow().style.opacity = String(Math.max(0, 0.4 - progress / 300));
+      return;
+    }
+
+    // ── Edge swipe back ──
+    // Cancel if scrolling vertically more than horizontally
+    if (!dragging && Math.abs(dy) > Math.abs(dx) + 6) { tracking = false; return; }
+    if (dx < 0) return;
+    dragging = true;
+
+    const progress = Math.min(dx, window.innerWidth * 0.55);
+    const pct = progress / TRIGGER_DIST;
+
+    scrollArea().style.transition = 'none';
+    scrollArea().style.transform = `translateX(${progress * 0.38}px)`;
+    scrollArea().style.opacity   = String(Math.max(0.6, 1 - pct * 0.25));
+    shadow().style.opacity       = String(Math.min(pct * 0.6, 0.55));
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    const t = e.changedTouches[0];
+
+    // ── Sheet swipe-down release ──
+    if (trackingSheet && dragging) {
+      trackingSheet = false;
+      dragging = false;
+      const dy = t.clientY - sheetStartY;
+      if (dy > SHEET_TRIGGER) {
+        // Snap down and close
+        sheet().style.transition = 'transform 0.28s cubic-bezier(.4,0,.2,1)';
+        sheet().style.transform  = 'translateY(100%)';
+        shadow().style.opacity   = '0';
+        setTimeout(() => {
+          sheet().style.transition = '';
+          sheet().style.transform  = '';
+          document.getElementById('sheet-overlay').classList.remove('open');
+          sheet().classList.remove('open');
+          sheetId = null;
+          updateBackBtn();
+        }, 280);
+      } else {
+        // Spring back
+        sheet().style.transition = 'transform 0.3s cubic-bezier(.4,0,.2,1)';
+        sheet().style.transform  = '';
+        shadow().style.opacity   = '0';
+        setTimeout(() => { sheet().style.transition = ''; }, 300);
+      }
+      return;
+    }
+
+    // ── Edge swipe back release ──
+    if (!tracking) return;
+    tracking = false;
+
+    const dx = t.clientX - startX;
+    const sa = scrollArea();
+
+    // Reset shadow
+    shadow().style.transition = 'opacity 0.2s';
+    shadow().style.opacity    = '0';
+    setTimeout(() => { shadow().style.transition = ''; }, 200);
+
+    if (dragging && dx >= TRIGGER_DIST) {
+      // Complete — slide out and navigate back
+      sa.style.transition = 'transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.2s';
+      sa.style.transform  = `translateX(${window.innerWidth * 0.4}px)`;
+      sa.style.opacity    = '0';
+      setTimeout(() => {
+        sa.style.transition = '';
+        sa.style.transform  = '';
+        sa.style.opacity    = '';
+        goBack();
+      }, 200);
+    } else {
+      // Spring back
+      sa.style.transition = 'transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.25s';
+      sa.style.transform  = '';
+      sa.style.opacity    = '';
+      setTimeout(() => { sa.style.transition = ''; }, 300);
+    }
+    dragging = false;
+  }, { passive: true });
+})();
 
 // ═══ START ═══
 window.addEventListener('DOMContentLoaded', init);
