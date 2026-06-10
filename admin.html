@@ -70,10 +70,11 @@
   .flag-czech{background:#003DA5;color:#fff;}
   .flag-belgium{background:linear-gradient(90deg,#000 33%,#FAE042 33% 66%,#EF3340 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
   .flag-ireland{background:linear-gradient(90deg,#169B62 33%,#fff 33% 66%,#FF883E 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+  .flag-netherlands{background:linear-gradient(180deg,#AE1C28 33%,#fff 33% 66%,#21468B 66%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
   tr.country-lithuania{border-left:5px solid #007A33;}  tr.country-romania{border-left:5px solid #002B7F;}
   tr.country-latvia{border-left:5px solid #9E3039;}     tr.country-luxembourg{border-left:5px solid #EF3340;}
   tr.country-czech{border-left:5px solid #003DA5;}      tr.country-belgium{border-left:5px solid #FAE042;}
-  tr.country-ireland{border-left:5px solid #169B62;}
+  tr.country-ireland{border-left:5px solid #169B62;}    tr.country-netherlands{border-left:5px solid #AE1C28;}
   .s-not-contacted{background:#ecf0f1;color:#7f8c8d;}  .s-contacted{background:#d6eaf8;color:#1a5276;}
   .s-awaiting{background:#fef9e7;color:#9a7d0a;}       .s-feedback{background:#d5f5e3;color:#1e7e45;}
   .s-meeting{background:#e8daef;color:#6c3483;}         .s-followup{background:#fdebd0;color:#9c640c;}
@@ -184,6 +185,7 @@
       <option value="Latvia">🇱🇻 Latvia</option><option value="Luxembourg">🇱🇺 Luxembourg</option>
       <option value="Czech Republic">🇨🇿 Czech Republic</option><option value="Belgium">🇧🇪 Belgium</option>
       <option value="Ireland">🇮🇪 Ireland</option>
+      <option value="Netherlands">🇳🇱 Netherlands</option>
     </select>
     <select id="filter-status" onchange="renderTable()">
       <option value="">All Statuses</option>
@@ -240,7 +242,7 @@
     <div class="form-row">
       <div><label>University Name *</label><input type="text" id="m-name" placeholder="University name"/></div>
       <div><label>Country *</label>
-        <select id="m-country"><option>Lithuania</option><option>Romania</option><option>Latvia</option><option>Luxembourg</option><option>Czech Republic</option><option>Belgium</option><option>Ireland</option><option>Other</option></select>
+        <select id="m-country"><option>Lithuania</option><option>Romania</option><option>Latvia</option><option>Luxembourg</option><option>Czech Republic</option><option>Belgium</option><option>Ireland</option><option>Netherlands</option><option>Other</option></select>
       </div>
     </div>
     <div class="form-row">
@@ -344,7 +346,7 @@ async function refreshData(){
 }
 
 function ck(c){return c.toLowerCase().replace(/\s+/g,'').replace('czechrepublic','czech');}
-const FLAG={'Lithuania':'🇱🇹','Romania':'🇷🇴','Latvia':'🇱🇻','Luxembourg':'🇱🇺','Czech Republic':'🇨🇿','Belgium':'🇧🇪','Ireland':'🇮🇪'};
+const FLAG={'Lithuania':'🇱🇹','Romania':'🇷🇴','Latvia':'🇱🇻','Luxembourg':'🇱🇺','Czech Republic':'🇨🇿','Belgium':'🇧🇪','Ireland':'🇮🇪','Netherlands':'🇳🇱'};
 const SCLS={'Not Contacted':'s-not-contacted','Contacted':'s-contacted','Awaiting Response':'s-awaiting','Feedback Received':'s-feedback','Meeting Scheduled':'s-meeting','Follow-up Needed':'s-followup','Verbal Agreement':'s-verbal','Pending Contract':'s-pending','Contract Signed':'s-signed','Partnership Active':'s-active','Partnership Expired':'s-expired'};
 
 function timer(d){if(!d)return'<span class="timer-chip timer-none">—</span>';const t=new Date();t.setHours(0,0,0,0);const diff=Math.ceil((new Date(d)-t)/86400000);if(diff<0)return`<span class="timer-chip timer-expired">Expired ${Math.abs(diff)}d ago</span>`;if(diff<=90)return`<span class="timer-chip timer-warning">${diff}d left</span>`;return`<span class="timer-chip timer-active">${Math.floor(diff/30)}m ${diff%30}d</span>`;}
@@ -362,7 +364,7 @@ function calcStats(data){
 
 function renderTable(){
   const q=document.getElementById('search-input').value.toLowerCase(),fc=document.getElementById('filter-country').value,fs=document.getElementById('filter-status').value,sb=document.getElementById('sort-by').value;
-  const ORD=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland'];
+  const ORD=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland','Netherlands'];
   let rows=DATA.filter(d=>(!q||d.name.toLowerCase().includes(q)||d.country.toLowerCase().includes(q)||(d.contact||'').toLowerCase().includes(q)||(d.notes||'').toLowerCase().includes(q))&&(!fc||d.country===fc)&&(!fs||d.status===fs));
   if(sb==='country')rows.sort((a,b)=>(ORD.indexOf(a.country)-ORD.indexOf(b.country))||a.name.localeCompare(b.name));
   else if(sb==='status')rows.sort((a,b)=>a.status.localeCompare(b.status));
@@ -456,7 +458,7 @@ function switchTab(id,btn){document.querySelectorAll('.tab-panel').forEach(p=>p.
 
 const CI={};
 const SC={'Not Contacted':'#bdc3c7','Contacted':'#3498db','Awaiting Response':'#f1c40f','Feedback Received':'#2ecc71','Meeting Scheduled':'#9b59b6','Follow-up Needed':'#e67e22','Verbal Agreement':'#1abc9c','Pending Contract':'#f39c12','Contract Signed':'#27ae60','Partnership Active':'#1e8449','Partnership Expired':'#e74c3c'};
-const CO=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland'];
+const CO=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland','Netherlands'];
 const SO=['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'];
 function dC(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
 function gauge(id,pct,color){dC(id);const s=Math.min(100,Math.max(0,pct));CI[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{datasets:[{data:[s,100-s],backgroundColor:[color,'#eef2f7'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',rotation:-90,circumference:180,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:800}}});}
