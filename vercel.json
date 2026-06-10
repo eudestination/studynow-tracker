@@ -1,9 +1,10 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/app",   "destination": "/app.html" },
-    { "source": "/",      "destination": "/index.html" }
+    { "source": "/admin",   "destination": "/admin.html" },
+    { "source": "/app",     "destination": "/app.html" },
+    { "source": "/wedding", "destination": "/wedding.html" },
+    { "source": "/",        "destination": "/index.html" }
   ],
   "headers": [
     {
