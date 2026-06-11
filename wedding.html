@@ -469,6 +469,14 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
         <div id="spLinkWrap" style="margin-top:.8rem;display:none;">
           <a id="spOpenLink" href="#" target="_blank" style="color:var(--al);font-size:.8rem;text-decoration:none;">▶ Open in Spotify →</a>
         </div>
+        <!-- Big mobile button — always visible once URL is set -->
+        <a id="spMobileBtn" href="#" target="_blank"
+          style="display:none;margin-top:.8rem;background:#1db954;color:#fff;
+          border-radius:30px;padding:.75rem 1.4rem;text-decoration:none;
+          font-weight:700;font-size:.9rem;align-items:center;gap:.6rem;
+          justify-content:center;letter-spacing:.03em;">
+          ♪ &nbsp;Open Our Wedding Playlist in Spotify
+        </a>
       </div>
 
       <div id="adminOnlyHome" style="display:none;">
@@ -764,6 +772,8 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 // DATA
 // ═══════════════════════════════════════════
 const ADMIN_USER = 'admin';
+// Spotify URL baked in at deploy time — update via saveSpotify() or ask admin to set BAKED_SPOTIFY_URL
+let BAKED_SPOTIFY_URL = '';
 const ADMIN_PASS = 'Theo&Ikram2026!';
 const VIEW_CODE  = 'THEOIKRAM0509';
 
@@ -991,24 +1001,36 @@ function renderHome() {
 }
 
 function loadSpotify() {
-  const url = settings.spotifyUrl;
+  const url = settings.spotifyUrl || BAKED_SPOTIFY_URL;
   if(!url) return;
   let embedUrl = url;
+  let playlistId = '';
   if(url.includes('open.spotify.com/playlist/')) {
-    const pid = url.split('playlist/')[1].split('?')[0];
-    embedUrl = `https://open.spotify.com/embed/playlist/${pid}?utm_source=generator&theme=0`;
+    playlistId = url.split('playlist/')[1].split('?')[0];
+    embedUrl = `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator&theme=0`;
   }
-  document.getElementById('spPlaceholder').style.display='none';
-  document.getElementById('spotifyEmbed').innerHTML = `<iframe src="${embedUrl}" width="100%" height="152" frameBorder="0" allowfullscreen allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy" style="border-radius:12px;"></iframe>`;
-  document.getElementById('spLinkWrap').style.display='block';
-  document.getElementById('spOpenLink').href = url;
+  const placeholder = document.getElementById('spPlaceholder');
+  if(placeholder) placeholder.style.display='none';
+  // Embed iframe
+  const embedEl = document.getElementById('spotifyEmbed');
+  if(embedEl) embedEl.innerHTML = `<iframe src="${embedUrl}" width="100%" height="152" frameBorder="0" allowfullscreen allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="eager" style="border-radius:12px;"></iframe>`;
+  // Show open link — always visible, big button on mobile
+  const linkWrap = document.getElementById('spLinkWrap');
+  if(linkWrap) linkWrap.style.display='block';
+  const openLink = document.getElementById('spOpenLink');
+  if(openLink) openLink.href = url;
+  // Show big mobile button
+  const mobileBtn = document.getElementById('spMobileBtn');
+  if(mobileBtn) { mobileBtn.href = url; mobileBtn.style.display='flex'; }
 }
 
 function saveSpotify() {
-  settings.spotifyUrl = document.getElementById('spotifyUrl').value.trim();
+  const url = document.getElementById('spotifyUrl').value.trim();
+  settings.spotifyUrl = url;
+  BAKED_SPOTIFY_URL = url;
   save('settings', settings);
   loadSpotify();
-  alert('Spotify playlist saved!');
+  alert('Spotify playlist saved! Share the page link — all viewers will now see the playlist.');
 }
 
 // ═══════════════════════════════════════════
