@@ -984,7 +984,7 @@ function renderGuests() {
   else if(currentGuestFilter==='pending') filtered=guests.filter(g=>g.rsvp==='pending');
   else if(currentGuestFilter==='declined') filtered=guests.filter(g=>g.rsvp==='declined');
   const rsvpBadge = {confirmed:'<span class="badge bg">Confirmed ✓</span>',declined:'<span class="badge br">Declined</span>',pending:'<span class="badge by">Pending</span>'};
-  const sideBadge = {groom:'<span class="badge bb">Groom's</span>',bride:'<span class="badge" style="background:#fdf2f8;color:#9d174d;">Bride's</span>'};
+  const sideBadge = {groom:`<span class="badge bb">Groom's</span>`,bride:`<span class="badge" style="background:#fdf2f8;color:#9d174d;">Bride's</span>`};
   const tbl = tblName => { const t=tables.find(x=>String(x.id)===String(tbl)); return t?t.name:''; };
   document.getElementById('guestList').innerHTML = filtered.length
     ? filtered.map(g=>{
