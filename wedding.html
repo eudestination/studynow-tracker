@@ -279,11 +279,95 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:#f0efe8;}
 ::-webkit-scrollbar-thumb{background:var(--g3);border-radius:3px;}
+
+/* ── MOBILE HEADER BAR ── */
+#mobileHeader{
+  display:flex;position:fixed;top:0;left:0;right:0;height:52px;
+  background:var(--g2);border-bottom:1px solid rgba(200,151,59,.2);
+  align-items:center;padding:0 1rem;gap:.8rem;z-index:99;
+}
+@media(min-width:768px){#mobileHeader{display:none;}}
+#mobileHeader .mh-logo{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--al);font-size:1.1rem;flex:1;}
+.hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:4px;}
+.hamburger span{display:block;width:22px;height:2px;background:rgba(255,255,255,.75);border-radius:2px;transition:.2s;}
+
+/* Push content below mobile header */
+@media(max-width:767px){
+  #app{padding-top:52px;}
+  .sec{min-height:calc(100vh - 52px - 62px);}
+}
+
+/* ── FLOATING SIDEBAR DRAWER (mobile) ── */
+#drawerOverlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:149;backdrop-filter:blur(2px);
+}
+#sideDrawer{
+  position:fixed;top:0;left:0;height:100%;width:240px;
+  background:var(--g2);z-index:150;
+  transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow-y:auto;
+  box-shadow:4px 0 24px rgba(0,0,0,.3);
+}
+#sideDrawer.open{transform:translateX(0);}
+.drawer-logo{padding:1.2rem;border-bottom:1px solid rgba(200,151,59,.2);}
+.drawer-logo-names{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;color:var(--al);}
+.drawer-logo-date{font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.45);margin-top:.2rem;}
+.drawer-nav{padding:.7rem 0;flex:1;}
+.drawer-ni{display:flex;align-items:center;gap:.75rem;padding:.75rem 1.2rem;cursor:pointer;color:rgba(255,255,255,.7);font-size:.88rem;font-weight:500;transition:.2s;}
+.drawer-ni:hover,.drawer-ni.active{color:var(--al);background:rgba(200,151,59,.12);}
+.drawer-ni.active{border-left:3px solid var(--ag);}
+.drawer-foot{padding:1rem 1.2rem;border-top:1px solid rgba(200,151,59,.2);}
+
+/* Swipe indicator on left edge (iOS hint) */
+@media(max-width:767px){
+  #app::before{
+    content:'';position:fixed;left:0;top:0;bottom:0;width:6px;
+    background:linear-gradient(90deg,rgba(200,151,59,.2),transparent);
+    z-index:98;pointer-events:none;
+  }
+}
+
 </style>
 </head>
 <body>
 
 <!-- ═══════════ LOGIN ═══════════ -->
+
+<!-- MOBILE HEADER -->
+<div id="mobileHeader">
+  <button class="hamburger" onclick="openDrawer()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="mh-logo">Ikram &amp; Theo</div>
+  <div style="font-size:.68rem;color:rgba(255,255,255,.45);letter-spacing:.1em;">05.09.2026</div>
+</div>
+
+<!-- FLOATING SIDEBAR DRAWER -->
+<div id="drawerOverlay" onclick="closeDrawer()"></div>
+<div id="sideDrawer">
+  <div class="drawer-logo">
+    <div class="drawer-logo-names">Ikram &amp; Theo</div>
+    <div class="drawer-logo-date">05 · September · 2026</div>
+  </div>
+  <div class="drawer-nav">
+    <div class="drawer-ni" onclick="go('home');closeDrawer()">🏠 &nbsp;Home</div>
+    <div class="drawer-ni" onclick="go('budget');closeDrawer()">💰 &nbsp;Budget</div>
+    <div class="drawer-ni" onclick="go('guests');closeDrawer()">👥 &nbsp;Guests</div>
+    <div class="drawer-ni" onclick="go('schedule');closeDrawer()">🕐 &nbsp;Schedule</div>
+    <div class="drawer-ni" onclick="go('seating');closeDrawer()">🪑 &nbsp;Seating</div>
+    <div class="drawer-ni" onclick="go('metrics');closeDrawer()">📊 &nbsp;Metrics</div>
+    <div class="drawer-ni" onclick="go('tasks');closeDrawer()">✅ &nbsp;Tasks</div>
+    <div class="drawer-ni" onclick="go('album');closeDrawer()">📸 &nbsp;Album</div>
+    <div class="drawer-ni" onclick="go('venues');closeDrawer()">📍 &nbsp;Venues</div>
+  </div>
+  <div class="drawer-foot">
+    <div id="drawerMode" class="mode-tag" style="margin-bottom:.6rem;">ADMIN</div><br>
+    <button class="btn btn-sm" onclick="logout()" style="width:100%;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:none;">Log Out</button>
+  </div>
+</div>
+
+
 <div id="loginWrap">
   <div class="lcard">
     <div class="l-names">Ikram<span class="l-amp">&amp;</span>Theo</div>
@@ -819,6 +903,8 @@ function enter() {
   appEl.style.removeProperty('display'); // let CSS handle it via class
   appEl.classList.add('visible');
   document.getElementById('sidebarMode').textContent = isAdmin ? 'ADMIN' : 'VIEW ONLY';
+  document.getElementById('drawerMode').textContent = isAdmin ? 'ADMIN' : 'VIEW ONLY';
+  saveSession();
   if (isAdmin) {
     document.getElementById('addGuestBtn').style.display='block';
     document.getElementById('addTaskBtn').style.display='block';
@@ -834,6 +920,7 @@ function enter() {
 }
 
 function logout() {
+  clearSession();
   document.getElementById('app').style.display='none';
   document.getElementById('loginWrap').style.display='flex';
   document.getElementById('lerr').textContent='';
@@ -845,10 +932,12 @@ function logout() {
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
-function go(id) {
+function go(id, isBack) {
   document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.bni').forEach(n => n.classList.remove('active'));
+  if (!isBack) { if (_navHistory[_navHistory.length-1] !== id) _navHistory.push(id); }
+  updateDrawerActive(id);
   const sec = document.getElementById('sec-'+id);
   if(sec) sec.classList.add('active');
   document.querySelectorAll('.ni').forEach(n => { if(n.textContent.toLowerCase().includes(id)) n.classList.add('active'); });
@@ -1496,6 +1585,85 @@ function closeModal(id,e) {
   if(e&&e.target.id!==id) return;
   document.getElementById(id).style.display='none';
 }
+
+// ── SESSION PERSISTENCE ──────────────────────────────────────────────────────
+function saveSession() {
+  localStorage.setItem('wi_session', JSON.stringify({isAdmin, ts: Date.now()}));
+}
+function clearSession() {
+  localStorage.removeItem('wi_session');
+}
+function restoreSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem('wi_session'));
+    if (s && (Date.now() - s.ts) < 7 * 24 * 60 * 60 * 1000) {
+      isAdmin = s.isAdmin;
+      enter();
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+// ── DRAWER ────────────────────────────────────────────────────────────────────
+function openDrawer() {
+  document.getElementById('sideDrawer').classList.add('open');
+  const ov = document.getElementById('drawerOverlay');
+  ov.style.display = 'block';
+  setTimeout(() => ov.style.opacity = '1', 10);
+}
+function closeDrawer() {
+  document.getElementById('sideDrawer').classList.remove('open');
+  const ov = document.getElementById('drawerOverlay');
+  ov.style.opacity = '0';
+  setTimeout(() => ov.style.display = 'none', 300);
+}
+function updateDrawerActive(id) {
+  document.querySelectorAll('.drawer-ni').forEach(n => {
+    n.classList.toggle('active', n.textContent.toLowerCase().includes(id));
+  });
+}
+
+// ── SWIPE GESTURES ────────────────────────────────────────────────────────────
+let _tx = 0, _ty = 0, _drawerOpen = false;
+const NAV_ORDER = ['home','budget','guests','schedule','seating','metrics','tasks','album','venues'];
+let _navHistory = ['home'];
+
+document.addEventListener('touchstart', e => {
+  _tx = e.touches[0].clientX;
+  _ty = e.touches[0].clientY;
+}, {passive:true});
+
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - _tx;
+  const dy = Math.abs(e.changedTouches[0].clientY - _ty);
+  const drawer = document.getElementById('sideDrawer');
+  if (dy > 60) return; // mostly vertical swipe, ignore
+
+  // Swipe RIGHT from left edge → open drawer
+  if (_tx < 30 && dx > 60) {
+    openDrawer();
+    return;
+  }
+  // Swipe LEFT on open drawer → close
+  if (drawer.classList.contains('open') && dx < -60) {
+    closeDrawer();
+    return;
+  }
+  // Swipe RIGHT (not from edge, drawer closed) → go back in history
+  if (!drawer.classList.contains('open') && _tx >= 30 && dx > 80) {
+    if (_navHistory.length > 1) {
+      _navHistory.pop();
+      go(_navHistory[_navHistory.length - 1], true);
+    }
+  }
+}, {passive:true});
+
+// ── INIT: try restoring session on load ───────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  restoreSession();
+});
+
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 </body>
