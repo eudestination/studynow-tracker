@@ -489,6 +489,17 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
           </div>
           <button class="btn btn-p btn-sm" onclick="saveSpotify()">Save Playlist</button>
           <div class="gold-line"></div>
+          <div class="card-t">☁️ Cloud Sync</div>
+          <p style="font-size:.78rem;color:var(--tl);margin-bottom:.8rem;">
+            Every save automatically syncs to the cloud so all devices see the same data.
+            Use this button if you ever need to force push your local data to the cloud.
+          </p>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn-p btn-sm" onclick="forcePushToCloud()">🔄 Force Push Local → Cloud</button>
+            <button class="btn btn-o btn-sm" onclick="loadCloudData().then(()=>{renderHome();renderGuests&&renderGuests();alert('Loaded latest data from cloud.');})">⬇️ Pull from Cloud</button>
+          </div>
+          <div id="forceSyncMsg" style="font-size:.75rem;margin-top:.5rem;color:var(--g3);"></div>
+          <div class="gold-line"></div>
           <div class="card-t">🔐 Access Credentials</div>
           <div class="access-info">
             <div class="cred-row"><span class="cred-k">Admin Username</span><span class="cred-v">admin</span></div>
@@ -1113,6 +1124,14 @@ function loadSpotify() {
   // Show big mobile button
   const mobileBtn = document.getElementById('spMobileBtn');
   if(mobileBtn) { mobileBtn.href = url; mobileBtn.style.display='flex'; }
+}
+
+async function forcePushToCloud() {
+  const msg = document.getElementById('forceSyncMsg');
+  if(msg) msg.textContent = '⟳ Pushing to cloud…';
+  const ok = await saveCloudData();
+  if(msg) msg.textContent = ok ? '✅ Successfully pushed to cloud! All devices will now see your data.' : '❌ Push failed. Check your connection and try again.';
+  if(ok) { renderHome(); }
 }
 
 function saveSpotify() {
