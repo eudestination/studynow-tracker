@@ -1087,82 +1087,78 @@ function renderSchedule() {
 // ═══════════════════════════════════════════
 function renderSeating() {
   const fp = document.getElementById('floorPlan');
+
+  // Helper: wrap a tCircle in a div with a top-margin for the zigzag offset
+  const tz = (id, up) => `<div style="margin-top:${up?'0':'20px'}">${tCircle(id)}</div>`;
+
   fp.innerHTML = `
-  <div style="position:relative;width:100%;min-width:340px;background:#f9f7f0;border-radius:10px;padding:8px;overflow:hidden;">
+  <div style="background:#f9f7f0;border-radius:10px;padding:10px 8px;overflow:hidden;">
 
-    <!-- Room section labels -->
-    <div style="display:flex;justify-content:space-around;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tl);margin-bottom:4px;padding:0 4px;">
-      <span>Byron</span>
-      <span style="color:var(--g3);font-weight:600;">▲ Fire Exit</span>
-      <span>Chambers</span>
-      <span>Perceval</span>
+    <!-- Section labels -->
+    <div style="display:grid;grid-template-columns:110px 1fr 68px;gap:6px;margin-bottom:4px;">
+      <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tl);text-align:center;">Byron</div>
+      <div style="display:flex;justify-content:space-around;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tl);">
+        <span style="color:#dc2626;font-weight:600;">▲ Fire Exit</span>
+        <span>Chambers</span>
+        <span>Perceval</span>
+      </div>
+      <div></div>
     </div>
 
-    <!-- MAIN FLOOR GRID: 3 columns – Byron | Main hall | Right strip -->
-    <div style="display:grid;grid-template-columns:130px 1fr 72px;gap:6px;align-items:start;">
+    <!-- MAIN GRID: left strip | centre hall | right strip -->
+    <div style="display:grid;grid-template-columns:110px 1fr 68px;gap:6px;align-items:start;">
 
-      <!-- ── LEFT: Byron section (Tables 11,12 + Fire exit label) ── -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:10px;">
-        <div style="font-size:.6rem;color:var(--g3);writing-mode:vertical-rl;letter-spacing:.15em;text-transform:uppercase;background:rgba(64,145,108,.12);border-radius:4px;padding:6px 3px;margin-bottom:4px;">Backdrop &amp; Decoration</div>
-        ${tCircle(11)}
-        ${tCircle(12)}
-        <div style="font-size:.58rem;color:#dc2626;letter-spacing:.08em;text-transform:uppercase;margin-top:4px;writing-mode:vertical-rl;">◄ Fire Exit</div>
+      <!-- LEFT: Backdrop label -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;">
+        <div style="font-size:.58rem;color:var(--g3);writing-mode:vertical-rl;letter-spacing:.13em;text-transform:uppercase;background:rgba(64,145,108,.12);border-radius:4px;padding:8px 3px;margin-top:8px;">Backdrop &amp; Decoration</div>
       </div>
 
-      <!-- ── CENTRE: Main hall ── -->
-      <div style="display:flex;flex-direction:column;gap:6px;">
+      <!-- CENTRE: all 3 rows stacked -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
 
-        <!-- Upper tables row: 1-5 -->
-        <div style="display:flex;justify-content:center;gap:6px;align-items:flex-end;">
-          ${tCircle(1)}
-          ${tCircle(2)}
-          ${tCircle(3)}
-          ${tCircle(4)}
-          ${tCircle(5)}
+        <!-- ROW 1 — Tables 1-5 + 11 with zigzag (even indices go up) -->
+        <div style="display:flex;gap:6px;align-items:flex-start;justify-content:center;">
+          ${tz(1,false)}${tz(2,true)}${tz(3,false)}${tz(4,true)}${tz(5,false)}${tz(11,true)}
         </div>
 
-        <!-- B&G table + Dancefloor -->
-        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-start;">
-          <!-- B&G (couple) table -->
-          <div class="t-circle couple" onclick="openTableModal('couple')" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);border-color:#7c3aed;flex-shrink:0;">
-            <div class="t-num" style="color:#fff;font-size:.75rem;">B&amp;G</div>
-            <div class="t-cnt" style="color:rgba(255,255,255,.85);">${(tables.find(t=>t.id==='couple')?.guests.length||0)}/2</div>
+        <!-- MIDDLE — B&G table left, Dancefloor right -->
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="t-circle" onclick="openTableModal('couple')"
+            style="background:linear-gradient(135deg,#7c3aed,#a78bfa);border-color:#7c3aed;flex-shrink:0;width:76px;height:76px;">
+            <div style="font-weight:700;font-size:.78rem;color:#fff;">B&amp;G</div>
+            <div style="font-size:.62rem;color:rgba(255,255,255,.85);">${tables.find(t=>String(t.id)==='couple')?.guests.length||0}/2</div>
           </div>
-          <!-- Dancefloor -->
-          <div style="flex:1;background:linear-gradient(135deg,#c8c8c8,#e8e8e8);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80px;border:2px solid #aaa;box-shadow:inset 0 2px 8px rgba(0,0,0,.1);">
-            <div style="font-size:.78rem;font-weight:600;color:#555;letter-spacing:.1em;">Dancefloor</div>
-            <div style="font-size:.68rem;color:#888;">12 × 12 ft</div>
+          <div style="flex:1;background:linear-gradient(135deg,#c0c0c0,#e4e4e4);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:76px;border:2px solid #bbb;box-shadow:inset 0 2px 8px rgba(0,0,0,.1);">
+            <div style="font-size:.82rem;font-weight:600;color:#555;letter-spacing:.08em;">Dancefloor</div>
+            <div style="font-size:.68rem;color:#888;margin-top:2px;">12 × 12 ft</div>
           </div>
         </div>
 
-        <!-- Lower tables row: 6-10 -->
-        <div style="display:flex;justify-content:center;gap:6px;align-items:flex-start;">
-          ${tCircle(6)}
-          ${tCircle(7)}
-          ${tCircle(8)}
-          ${tCircle(9)}
-          ${tCircle(10)}
+        <!-- ROW 2 — Tables 6-10 + 12 with zigzag -->
+        <div style="display:flex;gap:6px;align-items:flex-start;justify-content:center;">
+          ${tz(6,true)}${tz(7,false)}${tz(8,true)}${tz(9,false)}${tz(10,true)}${tz(12,false)}
         </div>
 
       </div>
 
-      <!-- ── RIGHT: DJ, Photo Booth, Entrance, Buffet ── -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:2px;">
-        <div style="background:#e85d04;color:#fff;border-radius:6px;padding:4px 5px;font-size:.58rem;font-weight:700;text-align:center;letter-spacing:.05em;width:64px;">DJ<br>Table</div>
-        <div style="background:#0d9488;color:#fff;border-radius:6px;padding:4px 5px;font-size:.58rem;font-weight:700;text-align:center;letter-spacing:.05em;width:64px;">Photo<br>Booth</div>
-        <div style="flex:1;"></div>
-        <div style="font-size:.6rem;color:var(--g2);letter-spacing:.1em;text-transform:uppercase;writing-mode:vertical-rl;background:rgba(27,67,50,.08);border-radius:4px;padding:6px 3px;">Entrance</div>
-        <div style="background:#6b7280;color:#fff;border-radius:6px;padding:4px 5px;font-size:.58rem;font-weight:700;text-align:center;width:64px;">Buffet</div>
+      <!-- RIGHT: DJ, Photo Booth, Entrance, Buffet -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="background:#e85d04;color:#fff;border-radius:6px;padding:5px 4px;font-size:.58rem;font-weight:700;text-align:center;width:62px;line-height:1.3;">DJ<br>Table</div>
+        <div style="background:#0d9488;color:#fff;border-radius:6px;padding:5px 4px;font-size:.58rem;font-weight:700;text-align:center;width:62px;line-height:1.3;">Photo<br>Booth</div>
+        <div style="flex:1;min-height:20px;"></div>
+        <div style="font-size:.58rem;color:var(--g2);letter-spacing:.1em;text-transform:uppercase;writing-mode:vertical-rl;background:rgba(27,67,50,.08);border-radius:4px;padding:6px 3px;">Entrance</div>
+        <div style="background:#6b7280;color:#fff;border-radius:6px;padding:5px 4px;font-size:.58rem;font-weight:700;text-align:center;width:62px;">Buffet</div>
       </div>
 
     </div>
 
-    <!-- Bottom strip: Entrance + Kitchen notice -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding:4px 8px;background:rgba(27,67,50,.06);border-radius:6px;font-size:.6rem;color:var(--tl);">
-      <span style="letter-spacing:.1em;text-transform:uppercase;">▲ Entrance</span>
+    <!-- Bottom bar -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:5px 8px;background:rgba(27,67,50,.06);border-radius:6px;font-size:.6rem;color:var(--tl);">
+      <span style="letter-spacing:.1em;text-transform:uppercase;">◄ Fire Exit</span>
       <span style="color:#dc2626;font-weight:600;">⚠ Kitchen doors — do not block</span>
       <span style="letter-spacing:.1em;text-transform:uppercase;">Entrance ▲</span>
     </div>
+
   </div>
   `;
 }
