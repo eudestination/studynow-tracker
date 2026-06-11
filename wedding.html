@@ -771,12 +771,9 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 <script>
 
 // ═══════════════════════════════════════════
-// CLOUD SYNC (GitHub as backend)
+// CLOUD SYNC — via /api/sync serverless function
 // ═══════════════════════════════════════════
-const CLOUD_REPO = 'eudestination/studynow-tracker';
-const CLOUD_FILE = 'wedding-data.json';
-const CLOUD_RAW  = `https://raw.githubusercontent.com/${CLOUD_REPO}/main/${CLOUD_FILE}`;
-const CLOUD_API  = `https://api.github.com/repos/${CLOUD_REPO}/contents/${CLOUD_FILE}`;
+const SYNC_API = '/api/sync';
 
 function showSync(state) {
   ['syncBadge','syncBadgeMobile'].forEach(id => {
@@ -787,7 +784,7 @@ function showSync(state) {
       saving: { t:'⟳ Saving…',  c:'#f0d090' },
       synced: { t:'✓ Synced',   c:'#74c69d' },
       error:  { t:'✗ Sync err', c:'#ff8080' },
-      offline:{ t:'⚠ Offline',  c:'rgba(255,255,255,.4)' },
+      offline:{ t:'',           c:'rgba(255,255,255,.3)' },
     };
     const s = map[state]||map.offline;
     el.textContent = s.t; el.style.color = s.c;
@@ -797,40 +794,39 @@ function showSync(state) {
 async function loadCloudData() {
   try {
     showSync('loading');
-    const res = await fetch(CLOUD_RAW + '?t=' + Date.now());
+    const res = await fetch(SYNC_API + '?t=' + Date.now());
     if(!res.ok) throw new Error('fetch failed');
     const d = await res.json();
 
-    // Smart merge: cloud wins if it has MORE data; local wins if local has more
-    // This protects against empty cloud overwriting real local data
     const cloudGuests   = d.guests   || [];
     const cloudExpenses = d.expenses || [];
     const cloudTasks    = d.tasks    || [];
     const cloudTables   = d.tables   || [];
 
-    const localHasMore = guests.length > cloudGuests.length ||
-                         expenses.filter(e=>e.est>0||e.paid>0).length >
-                         cloudExpenses.filter(e=>e.est>0||e.paid>0).length;
+    // Smart merge: whichever side has more real data wins
+    const localGuestCount = guests.length;
+    const cloudGuestCount = cloudGuests.length;
+    const localPaid = expenses.reduce((a,e)=>a+Number(e.paid||0),0);
+    const cloudPaid = cloudExpenses.reduce((a,e)=>a+Number(e.paid||0),0);
+    const localHasMore = localGuestCount > cloudGuestCount || localPaid > cloudPaid;
 
     if (localHasMore && isAdmin) {
-      // Local is richer — push local data up to cloud
-      console.log('Local has more data — pushing to cloud');
+      // Local is richer — push up to cloud
       showSync('saving');
       await saveCloudData();
     } else {
-      // Cloud is richer or equal — load cloud into local
-      if(cloudGuests.length > 0)    { guests   = cloudGuests;   save('guests',   guests);   }
-      if(cloudExpenses.length > 0)  { expenses = cloudExpenses; save('expenses', expenses); }
-      if(cloudTasks.length > 0)     { tasks    = cloudTasks;    save('tasks',    tasks);    }
-      if(cloudTables.length > 0)    { tables   = cloudTables;   save('tables',   tables);   }
+      // Cloud is richer — pull down
+      if(cloudGuests.length   > 0) { guests   = cloudGuests;   save('guests',   guests);   }
+      if(cloudExpenses.length > 0) { expenses = cloudExpenses; save('expenses', expenses); }
+      if(cloudTasks.length    > 0) { tasks    = cloudTasks;    save('tasks',    tasks);    }
+      if(cloudTables.length   > 0) { tables   = cloudTables;   save('tables',   tables);   }
+      if(d.settings?.spotifyUrl)   {
+        settings.spotifyUrl = d.settings.spotifyUrl;
+        BAKED_SPOTIFY_URL   = d.settings.spotifyUrl;
+        save('settings', settings);
+      }
+      showSync('synced');
     }
-
-    if(d.settings?.spotifyUrl) {
-      settings.spotifyUrl = d.settings.spotifyUrl;
-      BAKED_SPOTIFY_URL   = d.settings.spotifyUrl;
-      save('settings', settings);
-    }
-    showSync('synced');
     return true;
   } catch(e) {
     showSync('offline');
@@ -839,28 +835,20 @@ async function loadCloudData() {
 }
 
 async function saveCloudData() {
-  const token = localStorage.getItem('wi_ghtoken');
-  if(!token) { showSync('offline'); return false; }
+  if(!isAdmin) return false;
   showSync('saving');
   const payload = {
-    version:1,
-    lastUpdated: new Date().toISOString(),
-    settings:{ spotifyUrl: settings.spotifyUrl || BAKED_SPOTIFY_URL || '' },
+    version: 1,
+    settings: { spotifyUrl: settings.spotifyUrl || BAKED_SPOTIFY_URL || '' },
     expenses, guests, tasks, tables
   };
   try {
-    const metaRes = await fetch(CLOUD_API, {
-      headers:{ Authorization:`token ${token}`, Accept:'application/vnd.github.v3+json' }
+    const res = await fetch(SYNC_API, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'x-admin-key':'Theo&Ikram2026!' },
+      body: JSON.stringify(payload)
     });
-    if(!metaRes.ok) throw new Error('meta fetch failed');
-    const meta = await metaRes.json();
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
-    const putRes = await fetch(CLOUD_API, {
-      method:'PUT',
-      headers:{ Authorization:`token ${token}`, 'Content-Type':'application/json', Accept:'application/vnd.github.v3+json' },
-      body: JSON.stringify({ message:'💍 Wedding planner update', content, sha: meta.sha })
-    });
-    if(!putRes.ok) throw new Error('put failed');
+    if(!res.ok) throw new Error(await res.text());
     showSync('synced');
     return true;
   } catch(e) {
