@@ -69,10 +69,10 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 
 #content{}
 @media(min-width:768px){#content{margin-left:220px;min-height:100vh;}}
-.sec{display:none;padding:1.2rem;padding-bottom:calc(1.2rem + env(safe-area-inset-bottom,0));min-height:calc(100vh - 62px);}
-@media(min-width:768px){.sec{padding:2rem;min-height:100vh;}}
-.sec.active{display:block;animation:fadeUp .3s ease forwards;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.sec{display:none;padding:1.2rem;padding-bottom:calc(1.2rem + env(safe-area-inset-bottom,0));min-height:calc(100vh - 62px);opacity:1;}
+@media(min-width:768px){.sec{padding:2rem;min-height:100vh;opacity:1;}}
+.sec.active{display:block;opacity:1;}
+
 
 /* COMMON */
 .ph{margin-bottom:1.4rem;}
@@ -1064,10 +1064,6 @@ function go(id, isBack) {
   const sec = document.getElementById('sec-'+id);
   if(sec) {
     sec.classList.add('active');
-    // Force animation replay by briefly removing then re-adding the class
-    sec.style.animation = 'none';
-    sec.offsetHeight; // trigger reflow
-    sec.style.animation = '';
   }
   document.querySelectorAll('.ni').forEach(n => { if(n.textContent.toLowerCase().includes(id)) n.classList.add('active'); });
   document.querySelectorAll('.bni').forEach(n => { if(n.textContent.toLowerCase().includes(id)) n.classList.add('active'); });
