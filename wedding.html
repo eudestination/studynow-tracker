@@ -1184,7 +1184,14 @@ function openTableModal(id) {
     const g = assignedGuests[i];
     if(g) {
       const cls = g.side==='bride'?'bride':g.side==='groom'?'groom':'';
-      seats.push(`<div class="seat-slot filled ${cls}">${g.side==='bride'?'👰':'🤵'} ${g.name}<br><small style="font-size:.62rem;opacity:.8">${g.rsvp==='confirmed'?'✓':g.rsvp==='declined'?'✗':'?'}</small></div>`);
+      seats.push(`<div class="seat-slot filled ${cls}" style="position:relative;padding-right:22px;">
+        ${g.side==='bride'?'👰':'🤵'} ${g.name}<br>
+        <small style="font-size:.62rem;opacity:.8">${g.rsvp==='confirmed'?'✓':g.rsvp==='declined'?'✗':'?'}</small>
+        ${isAdmin?`<button onclick="unassignGuest(${g.id})" title="Remove from table"
+          style="position:absolute;top:3px;right:3px;background:#fee2e2;border:none;border-radius:50%;
+          width:18px;height:18px;font-size:.6rem;cursor:pointer;color:#991b1b;line-height:1;
+          display:flex;align-items:center;justify-content:center;">✕</button>`:''}
+      </div>`);
     } else {
       seats.push(`<div class="seat-slot">Empty seat</div>`);
     }
@@ -1397,6 +1404,19 @@ function closeLightbox() { document.getElementById('lightboxModal').style.displa
 // ═══════════════════════════════════════════
 // MODAL HELPERS
 // ═══════════════════════════════════════════
+function unassignGuest(guestId) {
+  const g = guests.find(x=>x.id===guestId);
+  if(!g) return;
+  // Remove from table
+  tables.forEach(t=>{ t.guests = t.guests.filter(id=>id!==guestId); });
+  g.table = '';
+  save('guests', guests);
+  save('tables', tables);
+  // Refresh modal and floor plan
+  openTableModal(currentTableId);
+  renderSeating();
+}
+
 function closeModal(id,e) {
   if(e&&e.target.id!==id) return;
   document.getElementById(id).style.display='none';
