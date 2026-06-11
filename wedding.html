@@ -483,7 +483,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
           <div class="leg-item"><div class="leg-dot" style="background:linear-gradient(135deg,var(--ag),var(--au));"></div><span>Couple's Table</span></div>
         </div>
       </div>
-      <div style="margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.8rem;font-size:.72rem;color:var(--tl);"><span>🟣 B&amp;G = Bride &amp; Groom table</span><span>🔵 Tables 1–10 = 4 seats each</span><span>🔵 Tables 11–12 = 5 seats each</span><span>💡 Tap any table to assign guests</span></div>
+      <div style="margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.8rem;font-size:.72rem;color:var(--tl);"><span>🟣 B&amp;G = Bride &amp; Groom table</span><span>🔵 Tables 1–5, 7–11 = 4 seats each</span><span>🔵 Tables 6 &amp; 12 = 5 seats each</span><span>💡 Tap any table to assign guests</span></div>
     </section>
 
     <!-- ── METRICS ── -->
@@ -691,17 +691,17 @@ const DEFAULT_TASKS = [
 
 const DEFAULT_TABLES = [
   {id:'couple',name:"Couple's Table",capacity:2,guests:[]},
-  {id:1,name:'Table 1',capacity:4,guests:[]},
-  {id:2,name:'Table 2',capacity:4,guests:[]},
-  {id:3,name:'Table 3',capacity:4,guests:[]},
-  {id:4,name:'Table 4',capacity:4,guests:[]},
-  {id:5,name:'Table 5',capacity:4,guests:[]},
-  {id:6,name:'Table 6',capacity:4,guests:[]},
-  {id:7,name:'Table 7',capacity:4,guests:[]},
-  {id:8,name:'Table 8',capacity:4,guests:[]},
-  {id:9,name:'Table 9',capacity:4,guests:[]},
+  {id:1, name:'Table 1', capacity:4,guests:[]},
+  {id:2, name:'Table 2', capacity:4,guests:[]},
+  {id:3, name:'Table 3', capacity:4,guests:[]},
+  {id:4, name:'Table 4', capacity:4,guests:[]},
+  {id:5, name:'Table 5', capacity:4,guests:[]},
+  {id:6, name:'Table 6', capacity:5,guests:[]},
+  {id:7, name:'Table 7', capacity:4,guests:[]},
+  {id:8, name:'Table 8', capacity:4,guests:[]},
+  {id:9, name:'Table 9', capacity:4,guests:[]},
   {id:10,name:'Table 10',capacity:4,guests:[]},
-  {id:11,name:'Table 11',capacity:5,guests:[]},
+  {id:11,name:'Table 11',capacity:4,guests:[]},
   {id:12,name:'Table 12',capacity:5,guests:[]},
 ];
 
@@ -1116,9 +1116,9 @@ function renderSeating() {
       <!-- CENTRE: all 3 rows stacked -->
       <div style="display:flex;flex-direction:column;gap:10px;">
 
-        <!-- ROW 1 — Tables 1-5 + 11 with zigzag (even indices go up) -->
+        <!-- ROW 1 — Tables 1-6 with zigzag -->
         <div style="display:flex;gap:6px;align-items:flex-start;justify-content:center;">
-          ${tz(1,false)}${tz(2,true)}${tz(3,false)}${tz(4,true)}${tz(5,false)}${tz(11,true)}
+          ${tz(1,false)}${tz(2,true)}${tz(3,false)}${tz(4,true)}${tz(5,false)}${tz(6,true)}
         </div>
 
         <!-- MIDDLE — B&G table left, Dancefloor right -->
@@ -1134,9 +1134,9 @@ function renderSeating() {
           </div>
         </div>
 
-        <!-- ROW 2 — Tables 6-10 + 12 with zigzag -->
+        <!-- ROW 2 — Tables 7-12 with zigzag -->
         <div style="display:flex;gap:6px;align-items:flex-start;justify-content:center;">
-          ${tz(6,true)}${tz(7,false)}${tz(8,true)}${tz(9,false)}${tz(10,true)}${tz(12,false)}
+          ${tz(7,true)}${tz(8,false)}${tz(9,true)}${tz(10,false)}${tz(11,true)}${tz(12,false)}
         </div>
 
       </div>
