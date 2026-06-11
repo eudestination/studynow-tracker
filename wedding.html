@@ -340,6 +340,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
     <span></span><span></span><span></span>
   </button>
   <div class="mh-logo">Ikram &amp; Theo</div>
+  <span id="syncBadgeMobile" style="font-size:.62rem;color:rgba(255,255,255,.4);"></span>
   <div style="font-size:.68rem;color:rgba(255,255,255,.45);letter-spacing:.1em;">05.09.2026</div>
 </div>
 
@@ -410,7 +411,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
       <div class="ni" onclick="go('venues')"><span class="ni-icon">📍</span> Venues</div>
     </div>
     <div class="sb-foot">
-      <span class="mode-tag" id="sidebarMode">ADMIN</span>
+      <span class="mode-tag" id="sidebarMode">ADMIN</span> <span id="syncBadge" style="font-size:.65rem;color:rgba(255,255,255,.4);margin-left:.3rem;"></span>
       <button class="btn btn-sm" style="margin-top:.6rem;width:100%;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:none;" onclick="logout()">Log Out</button>
     </div>
   </nav>
@@ -768,12 +769,93 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 <input type="file" id="photoInput" accept="image/*" style="display:none;" multiple onchange="handlePhotoUpload(event)">
 
 <script>
+
+// ═══════════════════════════════════════════
+// CLOUD SYNC (GitHub as backend)
+// ═══════════════════════════════════════════
+const CLOUD_REPO = 'eudestination/studynow-tracker';
+const CLOUD_FILE = 'wedding-data.json';
+const CLOUD_RAW  = `https://raw.githubusercontent.com/${CLOUD_REPO}/main/${CLOUD_FILE}`;
+const CLOUD_API  = `https://api.github.com/repos/${CLOUD_REPO}/contents/${CLOUD_FILE}`;
+
+function showSync(state) {
+  ['syncBadge','syncBadgeMobile'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const map = {
+      loading:{ t:'⟳ Syncing',  c:'#f0d090' },
+      saving: { t:'⟳ Saving…',  c:'#f0d090' },
+      synced: { t:'✓ Synced',   c:'#74c69d' },
+      error:  { t:'✗ Sync err', c:'#ff8080' },
+      offline:{ t:'⚠ Offline',  c:'rgba(255,255,255,.4)' },
+    };
+    const s = map[state]||map.offline;
+    el.textContent = s.t; el.style.color = s.c;
+  });
+}
+
+async function loadCloudData() {
+  try {
+    showSync('loading');
+    const res = await fetch(CLOUD_RAW + '?t=' + Date.now());
+    if(!res.ok) throw new Error('fetch failed');
+    const d = await res.json();
+    // Merge cloud into local — cloud is source of truth
+    if(d.guests  && d.guests.length  >= 0)  { guests   = d.guests;   save('guests',   guests);   }
+    if(d.expenses && d.expenses.length > 0)  { expenses = d.expenses; save('expenses', expenses); }
+    if(d.tasks   && d.tasks.length   > 0)   { tasks    = d.tasks;    save('tasks',    tasks);    }
+    if(d.tables  && d.tables.length  > 0)   { tables   = d.tables;   save('tables',   tables);   }
+    if(d.settings?.spotifyUrl) {
+      settings.spotifyUrl = d.settings.spotifyUrl;
+      BAKED_SPOTIFY_URL   = d.settings.spotifyUrl;
+      save('settings', settings);
+    }
+    showSync('synced');
+    return true;
+  } catch(e) {
+    showSync('offline');
+    return false;
+  }
+}
+
+async function saveCloudData() {
+  const token = localStorage.getItem('wi_ghtoken');
+  if(!token) { showSync('offline'); return false; }
+  showSync('saving');
+  const payload = {
+    version:1,
+    lastUpdated: new Date().toISOString(),
+    settings:{ spotifyUrl: settings.spotifyUrl || BAKED_SPOTIFY_URL || '' },
+    expenses, guests, tasks, tables
+  };
+  try {
+    const metaRes = await fetch(CLOUD_API, {
+      headers:{ Authorization:`token ${token}`, Accept:'application/vnd.github.v3+json' }
+    });
+    if(!metaRes.ok) throw new Error('meta fetch failed');
+    const meta = await metaRes.json();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const putRes = await fetch(CLOUD_API, {
+      method:'PUT',
+      headers:{ Authorization:`token ${token}`, 'Content-Type':'application/json', Accept:'application/vnd.github.v3+json' },
+      body: JSON.stringify({ message:'💍 Wedding planner update', content, sha: meta.sha })
+    });
+    if(!putRes.ok) throw new Error('put failed');
+    showSync('synced');
+    return true;
+  } catch(e) {
+    console.error('Cloud save failed:', e);
+    showSync('error');
+    return false;
+  }
+}
+
 // ═══════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════
 const ADMIN_USER = 'admin';
 // Spotify URL baked in at deploy time — update via saveSpotify() or ask admin to set BAKED_SPOTIFY_URL
-let BAKED_SPOTIFY_URL = '';
+let BAKED_SPOTIFY_URL = 'https://open.spotify.com/playlist/5Vci5jN5ImXhnYbTfjPC5B?si=mlYJR0Y0RbqAUcuMTwLGKw&pi=oddfwkLMTa-zi';
 const ADMIN_PASS = 'Theo&Ikram2026!';
 const VIEW_CODE  = 'THEOIKRAM0509';
 
@@ -926,6 +1008,7 @@ function enter() {
   renderHome();
   startCountdown();
   setTimeout(loadVenuePhotos, 100);
+  loadCloudData().then(() => { renderHome(); loadSpotify(); });
   go('home');
 }
 
@@ -1029,7 +1112,9 @@ function saveSpotify() {
   settings.spotifyUrl = url;
   BAKED_SPOTIFY_URL = url;
   save('settings', settings);
+  BAKED_SPOTIFY_URL = settings.spotifyUrl;
   loadSpotify();
+  saveCloudData();
   alert('Spotify playlist saved! Share the page link — all viewers will now see the playlist.');
 }
 
@@ -1098,7 +1183,7 @@ function updateExpense(id,field,val) {
   const e = expenses.find(x=>x.id===id);
   if(e) { e[field] = field==='est'||field==='paid' ? Number(val)||0 : val; }
 }
-function saveBudget() { save('expenses',expenses); renderBudget(); renderHome(); alert('Budget saved!'); }
+function saveBudget() { save('expenses',expenses); renderBudget(); renderHome(); saveCloudData(); alert('Budget saved!'); }
 
 // ═══════════════════════════════════════════
 // GUESTS
@@ -1198,7 +1283,7 @@ function saveGuest() {
   if(id) { const idx=guests.findIndex(x=>x.id===Number(id)); if(idx>-1) guests[idx]=g; }
   else guests.push(g);
   save('guests',guests); save('tables',tables);
-  closeModal('guestModal'); renderGuests(); renderHome();
+  closeModal('guestModal'); renderGuests(); renderHome(); saveCloudData();
 }
 
 function deleteGuest(id) {
@@ -1206,7 +1291,7 @@ function deleteGuest(id) {
   guests=guests.filter(g=>g.id!==id);
   tables.forEach(t=>{ t.guests=t.guests.filter(gid=>gid!==id); });
   save('guests',guests); save('tables',tables);
-  renderGuests(); renderHome();
+  renderGuests(); renderHome(); saveCloudData();
 }
 
 // ═══════════════════════════════════════════
@@ -1367,7 +1452,7 @@ function assignGuestToTable() {
   t.guests.push(gid);
   save('guests',guests); save('tables',tables);
   openTableModal(currentTableId);
-  renderSeating();
+  renderSeating(); saveCloudData();
 }
 
 // ═══════════════════════════════════════════
@@ -1471,7 +1556,7 @@ function toggleTask(id) {
   if(!t) return;
   if(t.status==='done') { t.status='todo'; t.completedDate=null; }
   else { t.status='done'; t.completedDate=new Date().toLocaleDateString('en-GB'); }
-  save('tasks',tasks); renderTasks(); renderHome();
+  save('tasks',tasks); renderTasks(); saveCloudData(); renderHome(); saveCloudData();
 }
 
 function openTaskModal() {
@@ -1485,13 +1570,13 @@ function saveTask() {
   const name=document.getElementById('taskName').value.trim();
   if(!name) return alert('Enter a task name.');
   tasks.push({id:Date.now(),name,cat:document.getElementById('taskCat').value,due:document.getElementById('taskDue').value,status:'todo',completedDate:null});
-  save('tasks',tasks); closeModal('taskModal'); renderTasks(); renderHome();
+  save('tasks',tasks); closeModal('taskModal'); renderTasks(); renderHome(); saveCloudData();
 }
 
 function deleteTask(id) {
   if(!confirm('Delete this task?')) return;
   tasks=tasks.filter(t=>t.id!==id);
-  save('tasks',tasks); renderTasks();
+  save('tasks',tasks); renderTasks(); saveCloudData();
 }
 
 // ═══════════════════════════════════════════
@@ -1598,6 +1683,7 @@ function unassignGuest(guestId) {
   g.table = '';
   save('guests', guests);
   save('tables', tables);
+  saveCloudData();
   // Refresh modal and floor plan
   openTableModal(currentTableId);
   renderSeating();

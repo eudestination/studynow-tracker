@@ -1,0 +1,388 @@
+{
+  "version": 1,
+  "lastUpdated": "",
+  "settings": {
+    "spotifyUrl": "https://open.spotify.com/playlist/5Vci5jN5ImXhnYbTfjPC5B?si=mlYJR0Y0RbqAUcuMTwLGKw&pi=oddfwkLMTa-zi"
+  },
+  "expenses": [
+    {
+      "id": 1,
+      "name": "Council Notice",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 2,
+      "name": "Ceremony Booking",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 3,
+      "name": "Venue Rental",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 4,
+      "name": "Drinks",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 5,
+      "name": "Reception Music",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 6,
+      "name": "Reception Decoration",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 7,
+      "name": "Photography & Videography",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 8,
+      "name": "Transportation",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 9,
+      "name": "Wedding Rings",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 10,
+      "name": "Bride's Jewelleries",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 11,
+      "name": "Bride's Wedding Dress",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 12,
+      "name": "Bride's Hair Accessories",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 13,
+      "name": "Bride's Shoes",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 14,
+      "name": "Groom's Suit",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 15,
+      "name": "Groom's Shoes",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 16,
+      "name": "Pocket Flowers for Men",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    },
+    {
+      "id": 17,
+      "name": "Expendables",
+      "est": 0,
+      "paid": 0,
+      "status": "pending",
+      "notes": ""
+    }
+  ],
+  "guests": [],
+  "tasks": [
+    {
+      "id": 1,
+      "name": "Register council notice",
+      "cat": "Legal",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 2,
+      "name": "Book ceremony at Brentham Club",
+      "cat": "Venue",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 3,
+      "name": "Confirm DoubleTree venue booking",
+      "cat": "Venue",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 4,
+      "name": "Order wedding rings",
+      "cat": "Attire",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 5,
+      "name": "Bride's dress fitting",
+      "cat": "Attire",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 6,
+      "name": "Bride's final dress fitting",
+      "cat": "Attire",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 7,
+      "name": "Groom's suit fitting",
+      "cat": "Attire",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 8,
+      "name": "Groom's final suit fitting",
+      "cat": "Attire",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 9,
+      "name": "Book photographer",
+      "cat": "Photography",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 10,
+      "name": "Book videographer",
+      "cat": "Photography",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 11,
+      "name": "Book DJ / reception music",
+      "cat": "Music",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 12,
+      "name": "Book transportation",
+      "cat": "Transport",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 13,
+      "name": "Plan decorations",
+      "cat": "Decoration",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 14,
+      "name": "Order pocket flowers",
+      "cat": "Decoration",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 15,
+      "name": "Send out invitations",
+      "cat": "Other",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 16,
+      "name": "Collect all RSVPs",
+      "cat": "Other",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 17,
+      "name": "Confirm final guest count with venue",
+      "cat": "Venue",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 18,
+      "name": "Hair trial",
+      "cat": "Beauty",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 19,
+      "name": "Finalise seating plan",
+      "cat": "Venue",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    },
+    {
+      "id": 20,
+      "name": "Buy bridesmaid / groomsmen gifts",
+      "cat": "Other",
+      "status": "todo",
+      "due": "",
+      "completedDate": null
+    }
+  ],
+  "tables": [
+    {
+      "id": "couple",
+      "name": "Couple's Table",
+      "capacity": 2,
+      "guests": []
+    },
+    {
+      "id": 1,
+      "name": "Table 1",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 2,
+      "name": "Table 2",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 3,
+      "name": "Table 3",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 4,
+      "name": "Table 4",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 5,
+      "name": "Table 5",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 6,
+      "name": "Table 6",
+      "capacity": 5,
+      "guests": []
+    },
+    {
+      "id": 7,
+      "name": "Table 7",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 8,
+      "name": "Table 8",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 9,
+      "name": "Table 9",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 10,
+      "name": "Table 10",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 11,
+      "name": "Table 11",
+      "capacity": 4,
+      "guests": []
+    },
+    {
+      "id": 12,
+      "name": "Table 12",
+      "capacity": 5,
+      "guests": []
+    }
+  ]
+}
