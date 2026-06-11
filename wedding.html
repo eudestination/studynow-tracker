@@ -179,8 +179,8 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 .tli-sep-txt{font-size:.68rem;letter-spacing:.2em;color:var(--ag);padding:0 .6rem;text-transform:uppercase;}
 
 /* SEATING */
-.floor-wrap{background:#fff;border-radius:var(--r);padding:1.2rem;box-shadow:var(--sh);overflow-x:auto;}
-.floor{min-width:340px;position:relative;}
+.floor-wrap{background:#fff;border-radius:var(--r);padding:1.2rem;box-shadow:var(--sh);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.floor{min-width:520px;position:relative;}
 .floor-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--tl);text-align:center;margin-bottom:.5rem;}
 .floor-grid{display:grid;gap:.8rem;}
 .floor-row{display:flex;gap:.8rem;justify-content:center;align-items:center;flex-wrap:wrap;}
@@ -587,6 +587,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
           <div class="leg-item"><div class="leg-dot" style="background:linear-gradient(135deg,var(--ag),var(--au));"></div><span>Couple's Table</span></div>
         </div>
       </div>
+      <div style="display:none;margin-bottom:.4rem;font-size:.7rem;color:var(--tl);text-align:center;" class="mobile-scroll-hint">← Swipe to scroll the floor plan →</div>
       <div style="margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.8rem;font-size:.72rem;color:var(--tl);"><span>🟣 B&amp;G = Bride &amp; Groom table</span><span>🔵 Tables 1–5, 7–11 = 4 seats each</span><span>🔵 Tables 6 &amp; 12 = 5 seats each</span><span>💡 Tap any table to assign guests</span></div>
     </section>
 
