@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="T&amp;I Wedding">
+<meta name="apple-mobile-web-app-title" content="Ikram &amp; Theo Wedding">
 <meta name="theme-color" content="#1b4332">
-<title>Theophilus &amp; Ikram · 05.09.2026</title>
+<title>Ikram &amp; Theo · 05.09.2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -286,7 +286,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 <!-- ═══════════ LOGIN ═══════════ -->
 <div id="loginWrap">
   <div class="lcard">
-    <div class="l-names">Theophilus<span class="l-amp">&amp;</span>Ikram</div>
+    <div class="l-names">Ikram<span class="l-amp">&amp;</span>Theo</div>
     <div class="l-date">05 · September · 2026</div>
     <div class="l-ornament">✦ ◆ ✦</div>
     <div class="ltabs">
@@ -311,7 +311,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
   <!-- SIDEBAR -->
   <nav id="sidebar">
     <div class="sb-logo">
-      <div class="sb-names">Theophilus &amp; Ikram</div>
+      <div class="sb-names">Ikram &amp; Theo</div>
       <div class="sb-date">05 · September · 2026</div>
     </div>
     <div class="sb-nav">
@@ -349,7 +349,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
     <!-- ── HOME ── -->
     <section class="sec active" id="sec-home">
       <div class="hero">
-        <div class="hero-names">Theophilus &amp; Ikram</div>
+        <div class="hero-names">Ikram &amp; Theo</div>
         <div class="hero-date">Saturday, 5th September 2026</div>
         <div class="cboxes" id="countdown">
           <div class="cbox"><div class="cbox-n" id="cd-d">--</div><div class="cbox-l">Days</div></div>
@@ -360,7 +360,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
       </div>
 
       <div class="couple-img">
-        <img src="/couple.jpg" alt="Theophilus &amp; Ikram">
+        <img src="/couple.jpg" alt="Ikram &amp; Theo">
       </div>
 
       <div class="sgrid" id="homeStats"></div>
@@ -460,7 +460,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
     <section class="sec" id="sec-schedule">
       <div class="ph"><div class="pt">Day Programme</div><div class="ps">✦ Saturday 5th September 2026</div></div>
       <div class="schedule-header">
-        <div class="sch-title">The Wedding of Theophilus &amp; Ikram</div>
+        <div class="sch-title">The Wedding of Ikram &amp; Theo</div>
         <div class="sch-sub">A day of love, joy &amp; celebration</div>
         <div style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap;">
           <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:.2rem .7rem;font-size:.72rem;">🌿 Ceremony — Brentham Club</span>
@@ -522,38 +522,75 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
     <section class="sec" id="sec-venues">
       <div class="ph"><div class="pt">Venues</div><div class="ps">✦ Our Wedding Locations</div></div>
 
+      <!-- BRENTHAM CLUB -->
       <div class="vcard">
-        <div class="vimg-single">
-          <div style="height:100%;display:flex;align-items:center;justify-content:center;color:white;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;background:var(--g2);">The Brentham Club</div>
+        <div id="brentham-img-wrap" style="height:220px;background:var(--g2);position:relative;overflow:hidden;cursor:pointer;" onclick="isAdmin&&document.getElementById('brentham-upload').click()">
+          <img id="brentham-img" src="" alt="The Brentham Club" style="width:100%;height:100%;object-fit:cover;display:none;">
+          <div id="brentham-placeholder" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.6);gap:.5rem;">
+            <div style="font-size:2rem;">🌿</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;color:var(--al);">The Brentham Club</div>
+            <div id="brentham-upload-hint" style="font-size:.72rem;display:none;">Tap to upload photo</div>
+          </div>
         </div>
+        <input type="file" id="brentham-upload" accept="image/*" style="display:none;" onchange="uploadVenuePhoto('brentham',this)">
         <div class="vinfo">
-          <div class="vname">🌿 The Brentham Club</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;">
+            <div class="vname">🌿 The Brentham Club</div>
+            <span class="badge by" style="font-size:.7rem;">Ceremony</span>
+          </div>
           <div class="vaddr">📍 38a Meadvale Rd, London W5 1NP</div>
-          <div class="vdetail"><span class="vdi">⏰</span><span><strong>Ceremony:</strong> Saturday 5 September 2026 · 2:00pm – 2:20pm</span></div>
+          <div class="vdetail"><span class="vdi">⏰</span><span><strong>Ceremony:</strong> Saturday 5 Sep 2026 · 2:00pm – 2:20pm</span></div>
           <div class="vdetail"><span class="vdi">💒</span><span>Civil ceremony · 20 minute service</span></div>
+          <div class="vdetail"><span class="vdi">🚇</span><span><strong>Nearest tube:</strong> Ealing Common Station</span></div>
           <div class="vdetail"><span class="vdi">🅿️</span><span>Parking available on site</span></div>
-          <div class="vdetail"><span class="vdi">🚇</span><span>Nearest tube: Pitshanger Lane / Ealing Broadway</span></div>
-          <div class="venue-map-btn">
+          <div class="venue-map-btn" style="margin-top:.8rem;">
             <a href="https://maps.google.com/?q=38a+Meadvale+Rd+London+W5+1NP" target="_blank" class="btn btn-p btn-sm">📍 Open in Maps</a>
           </div>
         </div>
       </div>
 
+      <!-- DOUBLETREE HILTON -->
       <div class="vcard">
-        <div class="vimages-row" style="height:130px;">
-          <div style="background:var(--g2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:.7rem;font-style:italic;">DoubleTree Ealing</div>
-          <div style="background:var(--g3);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:.7rem;font-style:italic;">Reception Hall</div>
-          <div style="background:var(--g4);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:.7rem;font-style:italic;">Ballroom</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;height:180px;">
+          <!-- Slot 1: Reception Hall -->
+          <div id="dt-hall-wrap" style="position:relative;overflow:hidden;background:var(--g2);cursor:pointer;" onclick="isAdmin&&document.getElementById('dt-hall-upload').click()">
+            <img id="dt-hall-img" src="" style="width:100%;height:100%;object-fit:cover;display:none;">
+            <div id="dt-hall-ph" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.55);font-size:.65rem;gap:3px;padding:4px;text-align:center;">
+              <span style="font-size:1.2rem;">🏛️</span>Reception Hall<div id="dt-hall-hint" style="font-size:.58rem;display:none;">Tap to upload</div>
+            </div>
+          </div>
+          <input type="file" id="dt-hall-upload" accept="image/*" style="display:none;" onchange="uploadVenuePhoto('dt-hall',this)">
+          <!-- Slot 2: Ballroom -->
+          <div id="dt-ball-wrap" style="position:relative;overflow:hidden;background:var(--g3);cursor:pointer;" onclick="isAdmin&&document.getElementById('dt-ball-upload').click()">
+            <img id="dt-ball-img" src="" style="width:100%;height:100%;object-fit:cover;display:none;">
+            <div id="dt-ball-ph" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.55);font-size:.65rem;gap:3px;padding:4px;text-align:center;">
+              <span style="font-size:1.2rem;">💃</span>Ballroom<div id="dt-ball-hint" style="font-size:.58rem;display:none;">Tap to upload</div>
+            </div>
+          </div>
+          <input type="file" id="dt-ball-upload" accept="image/*" style="display:none;" onchange="uploadVenuePhoto('dt-ball',this)">
+          <!-- Slot 3: DoubleTree Exterior -->
+          <div id="dt-ext-wrap" style="position:relative;overflow:hidden;background:var(--g4);cursor:pointer;" onclick="isAdmin&&document.getElementById('dt-ext-upload').click()">
+            <img id="dt-ext-img" src="" style="width:100%;height:100%;object-fit:cover;display:none;">
+            <div id="dt-ext-ph" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.55);font-size:.65rem;gap:3px;padding:4px;text-align:center;">
+              <span style="font-size:1.2rem;">🏨</span>Hotel Exterior<div id="dt-ext-hint" style="font-size:.58rem;display:none;">Tap to upload</div>
+            </div>
+          </div>
+          <input type="file" id="dt-ext-upload" accept="image/*" style="display:none;" onchange="uploadVenuePhoto('dt-ext',this)">
         </div>
         <div class="vinfo">
-          <div class="vname">🥂 DoubleTree by Hilton London Ealing</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;">
+            <div class="vname">🥂 DoubleTree by Hilton London Ealing</div>
+            <span class="badge bg" style="font-size:.7rem;">Reception</span>
+          </div>
           <div class="vaddr">📍 2-8 Hanger Lane, London W5 3HN</div>
-          <div class="vdetail"><span class="vdi">⏰</span><span><strong>Reception:</strong> Saturday 5 September 2026 · 5:30pm – 10:30pm</span></div>
+          <div class="vdetail"><span class="vdi">⏰</span><span><strong>Reception:</strong> Saturday 5 Sep 2026 · 5:30pm – 10:30pm</span></div>
           <div class="vdetail"><span class="vdi">🍽️</span><span>Dinner, dancing &amp; celebration · 5 hours</span></div>
           <div class="vdetail"><span class="vdi">📞</span><span>+44 (0)20 8896 4000</span></div>
-          <div class="vdetail"><span class="vdi">🚇</span><span>Nearest tube: Hanger Lane (Central line)</span></div>
+          <div class="vdetail"><span class="vdi">🚇</span><span><strong>Nearest tubes:</strong> Hanger Lane Underground &amp; Ealing Broadway Station</span></div>
+          <div class="vdetail"><span class="vdi">🚶</span><span>Walk from <strong>Ealing Common</strong> to venue: <strong>~6 minutes</strong></span></div>
+          <div class="vdetail"><span class="vdi">🚗</span><span>We recommend an <strong>Uber from the station</strong> — walk from Hanger Lane / Ealing Broadway is ~20 mins</span></div>
           <div class="vdetail"><span class="vdi">🅿️</span><span>Hotel parking available</span></div>
-          <div class="venue-map-btn">
+          <div class="venue-map-btn" style="margin-top:.8rem;">
             <a href="https://maps.google.com/?q=2-8+Hanger+Lane+London+W5+3HN" target="_blank" class="btn btn-g btn-sm">📍 Open in Maps</a>
           </div>
         </div>
@@ -792,6 +829,7 @@ function enter() {
   loadSpotify();
   renderHome();
   startCountdown();
+  setTimeout(loadVenuePhotos, 100);
   go('home');
 }
 
@@ -1404,6 +1442,43 @@ function closeLightbox() { document.getElementById('lightboxModal').style.displa
 // ═══════════════════════════════════════════
 // MODAL HELPERS
 // ═══════════════════════════════════════════
+function uploadVenuePhoto(key, input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const data = ev.target.result;
+    localStorage.setItem('vp_'+key, data);
+    applyVenuePhoto(key, data);
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function applyVenuePhoto(key, data) {
+  const img = document.getElementById(key+'-img');
+  const ph  = document.getElementById(key+'-ph') || document.getElementById(key+'-placeholder');
+  if(img && data) {
+    img.src = data;
+    img.style.display = 'block';
+    if(ph) ph.style.display = 'none';
+  }
+}
+
+function loadVenuePhotos() {
+  ['brentham','dt-hall','dt-ball','dt-ext'].forEach(key => {
+    const data = localStorage.getItem('vp_'+key);
+    if(data) applyVenuePhoto(key, data);
+  });
+  // Show upload hints for admin
+  if(isAdmin) {
+    ['brentham-upload-hint','dt-hall-hint','dt-ball-hint','dt-ext-hint'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'block';
+    });
+  }
+}
+
 function unassignGuest(guestId) {
   const g = guests.find(x=>x.id===guestId);
   if(!g) return;
