@@ -15,8 +15,11 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Always fetch Supabase calls live; cache everything else
+  // Pass through: Supabase, wedding planner, and non-GET requests
   if (e.request.url.includes('supabase.co')) return;
+  if (e.request.url.includes('/wedding')) return;
+  if (e.request.url.includes('couple.jpg')) return;
+  if (e.request.method !== 'GET') return;
   e.respondWith(
     fetch(e.request).then(res => {
       const clone = res.clone();
