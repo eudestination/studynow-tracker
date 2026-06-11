@@ -800,11 +800,31 @@ async function loadCloudData() {
     const res = await fetch(CLOUD_RAW + '?t=' + Date.now());
     if(!res.ok) throw new Error('fetch failed');
     const d = await res.json();
-    // Merge cloud into local — cloud is source of truth
-    if(d.guests  && d.guests.length  >= 0)  { guests   = d.guests;   save('guests',   guests);   }
-    if(d.expenses && d.expenses.length > 0)  { expenses = d.expenses; save('expenses', expenses); }
-    if(d.tasks   && d.tasks.length   > 0)   { tasks    = d.tasks;    save('tasks',    tasks);    }
-    if(d.tables  && d.tables.length  > 0)   { tables   = d.tables;   save('tables',   tables);   }
+
+    // Smart merge: cloud wins if it has MORE data; local wins if local has more
+    // This protects against empty cloud overwriting real local data
+    const cloudGuests   = d.guests   || [];
+    const cloudExpenses = d.expenses || [];
+    const cloudTasks    = d.tasks    || [];
+    const cloudTables   = d.tables   || [];
+
+    const localHasMore = guests.length > cloudGuests.length ||
+                         expenses.filter(e=>e.est>0||e.paid>0).length >
+                         cloudExpenses.filter(e=>e.est>0||e.paid>0).length;
+
+    if (localHasMore && isAdmin) {
+      // Local is richer — push local data up to cloud
+      console.log('Local has more data — pushing to cloud');
+      showSync('saving');
+      await saveCloudData();
+    } else {
+      // Cloud is richer or equal — load cloud into local
+      if(cloudGuests.length > 0)    { guests   = cloudGuests;   save('guests',   guests);   }
+      if(cloudExpenses.length > 0)  { expenses = cloudExpenses; save('expenses', expenses); }
+      if(cloudTasks.length > 0)     { tasks    = cloudTasks;    save('tasks',    tasks);    }
+      if(cloudTables.length > 0)    { tables   = cloudTables;   save('tables',   tables);   }
+    }
+
     if(d.settings?.spotifyUrl) {
       settings.spotifyUrl = d.settings.spotifyUrl;
       BAKED_SPOTIFY_URL   = d.settings.spotifyUrl;
