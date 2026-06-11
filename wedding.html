@@ -44,7 +44,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 .lerr{color:#ff8888;font-size:.78rem;margin-top:.4rem;min-height:1rem;}
 
 /* LAYOUT */
-#app{display:none;min-height:100vh;padding-bottom:65px;}#app.visible{display:block;}
+#app{display:none;min-height:100vh;padding-bottom:calc(65px + env(safe-area-inset-bottom,0));}#app.visible{display:block;}
 @media(min-width:768px){#app{padding-bottom:0;}}
 
 #sidebar{display:none;position:fixed;top:0;left:0;height:100vh;width:220px;background:var(--g2);color:#fff;z-index:100;flex-direction:column;overflow-y:auto;}
@@ -61,7 +61,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 .sb-foot{padding:1rem 1.2rem;border-top:1px solid rgba(200,151,59,.2);font-size:.7rem;}
 .mode-tag{display:inline-block;padding:.2rem .5rem;border-radius:4px;background:rgba(200,151,59,.2);color:var(--ag);letter-spacing:.1em;font-size:.68rem;}
 
-#bnav{position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--g2);border-top:1px solid rgba(200,151,59,.18);display:flex;z-index:100;safe-area-inset-bottom:env(safe-area-inset-bottom);}
+#bnav{position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--g2);border-top:1px solid rgba(200,151,59,.18);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0);}
 @media(min-width:768px){#bnav{display:none;}}
 .bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:rgba(255,255,255,.45);font-size:.5rem;font-weight:500;transition:.2s;padding:.2rem;}
 .bni.active{color:var(--ag);}
@@ -69,7 +69,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 
 #content{}
 @media(min-width:768px){#content{margin-left:220px;min-height:100vh;}}
-.sec{display:none;padding:1.2rem;min-height:calc(100vh - 62px);animation:fadeUp .35s ease both;}
+.sec{display:none;padding:1.2rem;padding-bottom:calc(1.2rem + env(safe-area-inset-bottom,0));min-height:calc(100vh - 62px);animation:fadeUp .35s ease both;}
 @media(min-width:768px){.sec{padding:2rem;min-height:100vh;}}
 .sec.active{display:block;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
@@ -235,7 +235,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif;}
 @media(min-width:480px){.pgrid{grid-template-columns:repeat(3,1fr);}}
 @media(min-width:768px){.pgrid{grid-template-columns:repeat(4,1fr);}}
 .pitem{aspect-ratio:1;border-radius:var(--r);overflow:hidden;cursor:pointer;position:relative;background:#e5e7eb;}
-.pitem img{width:100%;height:100%;object-fit:cover;transition:.3s;}
+.pitem img{width:100%;height:100%;object-fit:cover;display:block;transition:.3s;}
 .pitem:hover img{transform:scale(1.05);}
 .pitem-del{position:absolute;top:.3rem;right:.3rem;background:rgba(0,0,0,.6);border:none;border-radius:50%;width:24px;height:24px;color:#fff;font-size:.75rem;cursor:pointer;display:none;align-items:center;justify-content:center;}
 .pitem:hover .pitem-del{display:flex;}
@@ -846,10 +846,23 @@ async function loadCloudData() {
 async function saveCloudData() {
   if(!isAdmin) return false;
   showSync('saving');
+  // Compress photos before sync: strip large photos, keep only base64 under 300KB
+  const syncPhotos = photos.map(p => ({
+    ...p,
+    url: p.url && p.url.length < 400000 ? p.url : p.url ? '__TOO_LARGE__' : p.url
+  })).filter(p => p.url !== '__TOO_LARGE__');
+  // Venue photos from localStorage
+  const venuePhotos = {};
+  ['brentham','dt-hall','dt-ball','dt-ext'].forEach(k => {
+    const d = localStorage.getItem('vp_'+k);
+    if(d && d.length < 600000) venuePhotos[k] = d;
+  });
   const payload = {
     version: 1,
     settings: { spotifyUrl: settings.spotifyUrl || BAKED_SPOTIFY_URL || '' },
-    expenses, guests, tasks, tables
+    expenses, guests, tasks, tables,
+    photos: syncPhotos,
+    venuePhotos
   };
   try {
     const res = await fetch(SYNC_API, {
@@ -1060,6 +1073,7 @@ function go(id, isBack) {
   if(id==='metrics') renderMetrics();
   if(id==='tasks') renderTasks();
   if(id==='album') renderAlbum();
+  if(id==='venues') setTimeout(loadVenuePhotos, 100);
 }
 
 // ═══════════════════════════════════════════
