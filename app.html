@@ -145,6 +145,8 @@
   .st-signed         { background: #a8f0c0; color: #0f5c27; }
   .st-active         { background: #34c759; color: #fff; }
   .st-expired        { background: #ff3b30; color: #fff; }
+  .st-not-accepting  { background: #f4d5d5; color: #7d1a1a; }
+  .st-closed         { background: #4a4a4a; color: #fff; }
 
   /* DOT COLORS */
   .dot-not-contacted { background: #c7c7cc; }
@@ -457,10 +459,10 @@ const CI = {};
 const COUNTRIES = ['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland','Netherlands'];
 const FLAG = {'Lithuania':'🇱🇹','Romania':'🇷🇴','Latvia':'🇱🇻','Luxembourg':'🇱🇺','Czech Republic':'🇨🇿','Belgium':'🇧🇪','Ireland':'🇮🇪','Netherlands':'🇳🇱'};
 const SOLID = {'Lithuania':'#007A33','Romania':'#002B7F','Latvia':'#9E3039','Luxembourg':'#EF3340','Czech Republic':'#003DA5','Belgium':'#333','Ireland':'#169B62','Netherlands':'#AE1C28'};
-const STATUS_CLS = {'Not Contacted':'st-not-contacted','Contacted':'st-contacted','Awaiting Response':'st-awaiting','Feedback Received':'st-feedback','Meeting Scheduled':'st-meeting','Follow-up Needed':'st-followup','Verbal Agreement':'st-verbal','Pending Contract':'st-pending','Contract Signed':'st-signed','Partnership Active':'st-active','Partnership Expired':'st-expired'};
-const DOT_CLS = {'Not Contacted':'dot-not-contacted','Contacted':'dot-contacted','Awaiting Response':'dot-awaiting','Feedback Received':'dot-feedback','Meeting Scheduled':'dot-meeting','Follow-up Needed':'dot-followup','Verbal Agreement':'dot-verbal','Pending Contract':'dot-pending','Contract Signed':'dot-signed','Partnership Active':'dot-active','Partnership Expired':'dot-expired'};
-const STATUS_COLORS = {'Not Contacted':'#c7c7cc','Contacted':'#007aff','Awaiting Response':'#ffcc00','Feedback Received':'#34c759','Meeting Scheduled':'#af52de','Follow-up Needed':'#ff9500','Verbal Agreement':'#5ac8fa','Pending Contract':'#ff9500','Contract Signed':'#34c759','Partnership Active':'#1a7e35','Partnership Expired':'#ff3b30'};
-const STATUSES = ['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'];
+const STATUS_CLS = {'Not Contacted':'st-not-contacted','Contacted':'st-contacted','Awaiting Response':'st-awaiting','Feedback Received':'st-feedback','Meeting Scheduled':'st-meeting','Follow-up Needed':'st-followup','Verbal Agreement':'st-verbal','Pending Contract':'st-pending','Contract Signed':'st-signed','Partnership Active':'st-active','Partnership Expired':'st-expired','Not Accepting Agencies':'st-not-accepting','Closed / Lost':'st-closed'};
+const DOT_CLS = {'Not Contacted':'dot-not-contacted','Contacted':'dot-contacted','Awaiting Response':'dot-awaiting','Feedback Received':'dot-feedback','Meeting Scheduled':'dot-meeting','Follow-up Needed':'dot-followup','Verbal Agreement':'dot-verbal','Pending Contract':'dot-pending','Contract Signed':'dot-signed','Partnership Active':'dot-active','Partnership Expired':'dot-expired','Not Accepting Agencies':'dot-not-accepting','Closed / Lost':'dot-closed'};
+const STATUS_COLORS = {'Not Contacted':'#c7c7cc','Contacted':'#007aff','Awaiting Response':'#ffcc00','Feedback Received':'#34c759','Meeting Scheduled':'#af52de','Follow-up Needed':'#ff9500','Verbal Agreement':'#5ac8fa','Pending Contract':'#ff9500','Contract Signed':'#34c759','Partnership Active':'#1a7e35','Partnership Expired':'#ff3b30','Not Accepting Agencies':'#c0392b','Closed / Lost':'#4a4a4a'};
+const STATUSES = ['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired','Not Accepting Agencies'];
 
 // ═══ INIT ═══
 async function init() {

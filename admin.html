@@ -81,6 +81,16 @@
   .s-verbal{background:#d1f2eb;color:#0e6655;}          .s-pending{background:#fad7a0;color:#9c6400;}
   .s-signed{background:#a9dfbf;color:#1d6a39;}          .s-active{background:#27ae60;color:#fff;}
   .s-expired{background:#e74c3c;color:#fff;}
+  .s-not-accepting{background:#f4d5d5;color:#7d1a1a;}
+  .s-closed{background:#4a4a4a;color:#fff;}
+  .closed-table-wrap{padding:20px 28px;overflow-x:auto;}
+  .closed-table-wrap table{width:100%;border-collapse:collapse;font-size:.83rem;}
+  .closed-table-wrap thead th{background:#4a4a4a;color:#fff;padding:10px 8px;text-align:left;font-weight:600;white-space:nowrap;}
+  .closed-empty{text-align:center;padding:40px;color:#999;font-size:.9rem;}
+  .btn-reopen{background:#27ae60;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:.78rem;font-weight:600;cursor:pointer;}
+  .btn-reopen:hover{background:#1e7e45;}
+  .btn-close{background:#e67e22;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:.78rem;font-weight:600;cursor:pointer;display:block;margin-bottom:3px;}
+  .btn-close:hover{background:#ca6f1e;}
   .timer-chip{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.72rem;font-weight:600;}
   .timer-active{background:#d5f5e3;color:#1e7e45;}  .timer-warning{background:#fdebd0;color:#9c640c;}
   .timer-expired{background:#fadbd8;color:#c0392b;} .timer-none{background:#ecf0f1;color:#999;}
@@ -165,6 +175,7 @@
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('tab-data',this)">📋 Universities</button>
   <button class="tab-btn" onclick="switchTab('tab-reports',this)">📊 Reports & Charts</button>
+  <button class="tab-btn" onclick="switchTab('tab-closed',this)" style="color:#c0392b" id="tab-btn-closed">🔴 Closed / Lost</button>
 </nav>
 
 <div id="tab-data" class="tab-panel active">
@@ -176,6 +187,7 @@
     <div class="stat-card"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">Pending Contract</div></div>
     <div class="stat-card green"><div class="stat-num" id="stat-signed">—</div><div class="stat-label">Signed Contracts</div></div>
     <div class="stat-card red"><div class="stat-num" id="stat-expiring">—</div><div class="stat-label">Expiring in 90 Days</div></div>
+    <div class="stat-card" style="border-left-color:#4a4a4a"><div class="stat-num" id="stat-closed" style="color:#4a4a4a">—</div><div class="stat-label">Closed / Lost</div></div>
   </div>
   <div class="toolbar">
     <input type="text" class="search-box" id="search-input" placeholder="🔍  Search university, country, contact…" oninput="renderTable()"/>
@@ -193,6 +205,7 @@
       <option>Feedback Received</option><option>Meeting Scheduled</option><option>Follow-up Needed</option>
       <option>Verbal Agreement</option><option>Pending Contract</option><option>Contract Signed</option>
       <option>Partnership Active</option><option>Partnership Expired</option>
+      <option>Not Accepting Agencies</option>
     </select>
     <select id="sort-by" onchange="renderTable()">
       <option value="country">Group by Country</option><option value="status">Sort by Status</option>
@@ -236,6 +249,24 @@
 </div>
 </div>
 
+<div id="tab-closed" class="tab-panel">
+  <div style="padding:18px 28px;background:#fff;border-bottom:1px solid #dde;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <span style="font-weight:700;color:#4a4a4a;font-size:.95rem;">🔴 Closed / Lost Universities</span>
+    <span style="font-size:.82rem;color:#888;">Universities marked as not progressing — closed deals or lost contacts. Use Reopen to restore to the active pipeline.</span>
+  </div>
+  <div class="closed-table-wrap" id="closed-table-wrap">
+    <table><thead><tr>
+      <th style="width:220px">University</th>
+      <th style="width:120px">Country</th>
+      <th style="width:140px">Reason</th>
+      <th style="width:110px">Date Contacted</th>
+      <th style="width:110px">Last Contact</th>
+      <th>Notes</th>
+      <th style="width:110px">Actions</th>
+    </tr></thead><tbody id="closed-body"></tbody></table>
+  </div>
+</div>
+
 <div id="add-modal" class="modal-overlay" style="display:none">
   <div class="modal">
     <h3 id="modal-title">Add University</h3>
@@ -247,7 +278,7 @@
     </div>
     <div class="form-row">
       <div><label>Status</label>
-        <select id="m-status"><option>Not Contacted</option><option>Contacted</option><option>Awaiting Response</option><option>Feedback Received</option><option>Meeting Scheduled</option><option>Follow-up Needed</option><option>Verbal Agreement</option><option>Pending Contract</option><option>Contract Signed</option><option>Partnership Active</option><option>Partnership Expired</option></select>
+        <select id="m-status"><option>Not Contacted</option><option>Contacted</option><option>Awaiting Response</option><option>Feedback Received</option><option>Meeting Scheduled</option><option>Follow-up Needed</option><option>Verbal Agreement</option><option>Pending Contract</option><option>Contract Signed</option><option>Partnership Active</option><option>Partnership Expired</option><option>Not Accepting Agencies</option></select>
       </div>
       <div><label>Contact Person / Email</label><input type="text" id="m-contact" placeholder="Name / email@uni.edu"/></div>
     </div>
@@ -347,25 +378,31 @@ async function refreshData(){
 
 function ck(c){return c.toLowerCase().replace(/\s+/g,'').replace('czechrepublic','czech');}
 const FLAG={'Lithuania':'🇱🇹','Romania':'🇷🇴','Latvia':'🇱🇻','Luxembourg':'🇱🇺','Czech Republic':'🇨🇿','Belgium':'🇧🇪','Ireland':'🇮🇪','Netherlands':'🇳🇱'};
-const SCLS={'Not Contacted':'s-not-contacted','Contacted':'s-contacted','Awaiting Response':'s-awaiting','Feedback Received':'s-feedback','Meeting Scheduled':'s-meeting','Follow-up Needed':'s-followup','Verbal Agreement':'s-verbal','Pending Contract':'s-pending','Contract Signed':'s-signed','Partnership Active':'s-active','Partnership Expired':'s-expired'};
+const SCLS={'Not Contacted':'s-not-contacted','Contacted':'s-contacted','Awaiting Response':'s-awaiting','Feedback Received':'s-feedback','Meeting Scheduled':'s-meeting','Follow-up Needed':'s-followup','Verbal Agreement':'s-verbal','Pending Contract':'s-pending','Contract Signed':'s-signed','Partnership Active':'s-active','Partnership Expired':'s-expired','Not Accepting Agencies':'s-not-accepting','Closed / Lost':'s-closed'};
 
 function timer(d){if(!d)return'<span class="timer-chip timer-none">—</span>';const t=new Date();t.setHours(0,0,0,0);const diff=Math.ceil((new Date(d)-t)/86400000);if(diff<0)return`<span class="timer-chip timer-expired">Expired ${Math.abs(diff)}d ago</span>`;if(diff<=90)return`<span class="timer-chip timer-warning">${diff}d left</span>`;return`<span class="timer-chip timer-active">${Math.floor(diff/30)}m ${diff%30}d</span>`;}
 
 function calcStats(data){
   const t=new Date();t.setHours(0,0,0,0);
-  document.getElementById('stat-total').textContent=data.length;
-  document.getElementById('stat-contacted').textContent=data.filter(d=>d.dateContacted).length;
-  document.getElementById('stat-meetings').textContent=data.filter(d=>d.status==='Meeting Scheduled').length;
-  document.getElementById('stat-verbal').textContent=data.filter(d=>d.status==='Verbal Agreement'||d.verbal).length;
-  document.getElementById('stat-pending').textContent=data.filter(d=>d.status==='Pending Contract').length;
-  document.getElementById('stat-signed').textContent=data.filter(d=>d.signed||d.status==='Contract Signed'||d.status==='Partnership Active').length;
-  document.getElementById('stat-expiring').textContent=data.filter(d=>{if(!d.contractEnd)return false;const diff=Math.ceil((new Date(d.contractEnd)-t)/86400000);return diff>=0&&diff<=90;}).length;
+  const active=data.filter(d=>d.status!=='Closed / Lost');
+  document.getElementById('stat-total').textContent=active.length;
+  document.getElementById('stat-contacted').textContent=active.filter(d=>d.dateContacted).length;
+  document.getElementById('stat-meetings').textContent=active.filter(d=>d.status==='Meeting Scheduled').length;
+  document.getElementById('stat-verbal').textContent=active.filter(d=>d.status==='Verbal Agreement'||d.verbal).length;
+  document.getElementById('stat-pending').textContent=active.filter(d=>d.status==='Pending Contract').length;
+  document.getElementById('stat-signed').textContent=active.filter(d=>d.signed||d.status==='Contract Signed'||d.status==='Partnership Active').length;
+  document.getElementById('stat-expiring').textContent=active.filter(d=>{if(!d.contractEnd)return false;const diff=Math.ceil((new Date(d.contractEnd)-t)/86400000);return diff>=0&&diff<=90;}).length;
+  document.getElementById('stat-closed').textContent=data.filter(d=>d.status==='Closed / Lost').length;
+  // update closed tab badge
+  const cn=data.filter(d=>d.status==='Closed / Lost').length;
+  const tb=document.getElementById('tab-btn-closed');
+  if(tb)tb.textContent=`🔴 Closed / Lost${cn>0?' ('+cn+')':''}`;
 }
 
 function renderTable(){
   const q=document.getElementById('search-input').value.toLowerCase(),fc=document.getElementById('filter-country').value,fs=document.getElementById('filter-status').value,sb=document.getElementById('sort-by').value;
   const ORD=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland','Netherlands'];
-  let rows=DATA.filter(d=>(!q||d.name.toLowerCase().includes(q)||d.country.toLowerCase().includes(q)||(d.contact||'').toLowerCase().includes(q)||(d.notes||'').toLowerCase().includes(q))&&(!fc||d.country===fc)&&(!fs||d.status===fs));
+  let rows=DATA.filter(d=>d.status!=='Closed / Lost'&&(!q||d.name.toLowerCase().includes(q)||d.country.toLowerCase().includes(q)||(d.contact||'').toLowerCase().includes(q)||(d.notes||'').toLowerCase().includes(q))&&(!fc||d.country===fc)&&(!fs||d.status===fs));
   if(sb==='country')rows.sort((a,b)=>(ORD.indexOf(a.country)-ORD.indexOf(b.country))||a.name.localeCompare(b.name));
   else if(sb==='status')rows.sort((a,b)=>a.status.localeCompare(b.status));
   else if(sb==='name')rows.sort((a,b)=>a.name.localeCompare(b.name));
@@ -392,7 +429,7 @@ function renderTable(){
       <td><input type="date" value="${row.contractEnd||''}" data-field="contractEnd" data-id="${row.id}" onchange="fc_(this)"/></td>
       <td>${timer(row.contractEnd)}</td>
       <td><input type="date" value="${row.reminder||''}" data-field="reminder" data-id="${row.id}" onchange="fc_(this)"/></td>
-      <td><button class="btn btn-danger btn-sm" onclick="delRow('${row.id}')">✕</button></td>
+      <td style="white-space:nowrap;vertical-align:middle"><button class="btn-close" onclick="closeRow('${row.id}')">Close/Lost</button><button class="btn btn-danger btn-sm" onclick="delRow('${row.id}')">✕ Del</button></td>
     </tr>`;
   });
   if(!rows.length)html=`<tr><td colspan="16" style="text-align:center;padding:30px;color:#999">No universities match your filters.</td></tr>`;
@@ -401,7 +438,44 @@ function renderTable(){
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function sOpts(sel){return['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'].map(o=>`<option${o===sel?' selected':''}>${o}</option>`).join('');}
+function sOpts(sel){return['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired','Not Accepting Agencies'].map(o=>`<option${o===sel?' selected':''}>${o}</option>`).join('');}
+
+async function closeRow(id){
+  if(!confirm('Mark this university as Closed / Lost? It will move to the Closed tab. You can reopen it anytime.'))return;
+  const idx=DATA.findIndex(d=>d.id===id);if(idx<0)return;
+  DATA[idx].status='Closed / Lost';
+  setSaveStatus('saving','💾 Saving…');
+  try{await sbUpsert(DATA[idx]);setSaveStatus('saved','✓ Moved to Closed');renderTable();calcStats(DATA);}
+  catch(e){setSaveStatus('error','⚠ Failed');}
+}
+
+async function reopenRow(id){
+  const idx=DATA.findIndex(d=>d.id===id);if(idx<0)return;
+  DATA[idx].status='Not Contacted';
+  setSaveStatus('saving','💾 Saving…');
+  try{await sbUpsert(DATA[idx]);setSaveStatus('saved','✓ Reopened');renderClosedTab();renderTable();calcStats(DATA);}
+  catch(e){setSaveStatus('error','⚠ Failed');}
+}
+
+function renderClosedTab(){
+  const closed=DATA.filter(d=>d.status==='Closed / Lost');
+  if(!closed.length){document.getElementById('closed-body').innerHTML=`<tr><td colspan="7" class="closed-empty">No closed or lost universities. Use the "Close/Lost" button on any university to move it here.</td></tr>`;return;}
+  let html='';
+  closed.sort((a,b)=>a.country.localeCompare(b.country)||a.name.localeCompare(b.name));
+  closed.forEach(row=>{
+    const k=ck(row.country);
+    html+=`<tr class="country-${k}" data-id="${row.id}">
+      <td style="font-weight:600">${esc(row.name)}</td>
+      <td><span class="country-flag flag-${k}">${FLAG[row.country]||''} ${row.country}</span></td>
+      <td><span class="timer-chip s-closed" style="padding:3px 8px;border-radius:4px;font-size:.78rem">Closed / Lost</span></td>
+      <td style="color:#999;font-size:.82rem">${row.dateContacted||'—'}</td>
+      <td style="color:#999;font-size:.82rem">${row.lastContact||'—'}</td>
+      <td style="font-size:.82rem;color:#555">${esc(row.notes||'—')}</td>
+      <td style="white-space:nowrap"><button class="btn-reopen" onclick="reopenRow('${row.id}')">↩ Reopen</button>&nbsp;<button class="btn btn-danger btn-sm" onclick="delRow('${row.id}')">✕</button></td>
+    </tr>`;
+  });
+  document.getElementById('closed-body').innerHTML=html;
+}
 
 function fc_(el){
   const id=el.dataset.id,field=el.dataset.field,val=el.value;
@@ -454,17 +528,17 @@ function initFloatingScrollbar(){
   new MutationObserver(syncW).observe(wrap,{childList:true,subtree:true});
 }
 
-function switchTab(id,btn){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');if(id==='tab-reports')renderCharts();}
+function switchTab(id,btn){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');if(id==='tab-reports')renderCharts();if(id==='tab-closed')renderClosedTab();}
 
 const CI={};
-const SC={'Not Contacted':'#bdc3c7','Contacted':'#3498db','Awaiting Response':'#f1c40f','Feedback Received':'#2ecc71','Meeting Scheduled':'#9b59b6','Follow-up Needed':'#e67e22','Verbal Agreement':'#1abc9c','Pending Contract':'#f39c12','Contract Signed':'#27ae60','Partnership Active':'#1e8449','Partnership Expired':'#e74c3c'};
+const SC={'Not Contacted':'#bdc3c7','Contacted':'#3498db','Awaiting Response':'#f1c40f','Feedback Received':'#2ecc71','Meeting Scheduled':'#9b59b6','Follow-up Needed':'#e67e22','Verbal Agreement':'#1abc9c','Pending Contract':'#f39c12','Contract Signed':'#27ae60','Partnership Active':'#1e8449','Partnership Expired':'#e74c3c','Not Accepting Agencies':'#c0392b'};
 const CO=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland','Netherlands'];
-const SO=['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'];
+const SO=['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired','Not Accepting Agencies'];
 function dC(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
 function gauge(id,pct,color){dC(id);const s=Math.min(100,Math.max(0,pct));CI[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{datasets:[{data:[s,100-s],backgroundColor:[color,'#eef2f7'],borderWidth:0,hoverOffset:0}]},options:{cutout:'72%',rotation:-90,circumference:180,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:800}}});}
 
 function renderCharts(){
-  const data=DATA;if(!data.length)return;
+  const data=DATA.filter(d=>d.status!=='Closed / Lost');if(!data.length)return;
   const today=new Date();today.setHours(0,0,0,0);
   const sc={};SO.forEach(s=>sc[s]=0);data.forEach(d=>{if(sc[d.status]!==undefined)sc[d.status]++;});
   const dl=SO.filter(s=>sc[s]>0),dd=dl.map(s=>sc[s]),dc=dl.map(s=>SC[s]);

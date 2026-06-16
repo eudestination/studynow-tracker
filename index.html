@@ -65,6 +65,8 @@
   .s-verbal{background:#d1f2eb;color:#0e6655;}          .s-pending{background:#fad7a0;color:#9c6400;}
   .s-signed{background:#a9dfbf;color:#1d6a39;}          .s-active{background:#27ae60;color:#fff;}
   .s-expired{background:#e74c3c;color:#fff;}
+  .s-not-accepting{background:#f4d5d5;color:#7d1a1a;}
+  .s-closed{background:#4a4a4a;color:#fff;}
   .timer-active{background:#d5f5e3;color:#1e7e45;}  .timer-warning{background:#fdebd0;color:#9c640c;}
   .timer-expired{background:#fadbd8;color:#c0392b;}
   .pipeline-section{padding:10px 28px 24px;}
@@ -223,10 +225,10 @@ const collapsedCountries = new Set();
 
 const SOLID={'Lithuania':'#007A33','Romania':'#002B7F','Latvia':'#9E3039','Luxembourg':'#EF3340','Czech Republic':'#003DA5','Belgium':'#333','Ireland':'#169B62','Netherlands':'#AE1C28'};
 const FLAG={'Lithuania':'🇱🇹','Romania':'🇷🇴','Latvia':'🇱🇻','Luxembourg':'🇱🇺','Czech Republic':'🇨🇿','Belgium':'🇧🇪','Ireland':'🇮🇪','Netherlands':'🇳🇱'};
-const SCLS={'Not Contacted':'s-not-contacted','Contacted':'s-contacted','Awaiting Response':'s-awaiting','Feedback Received':'s-feedback','Meeting Scheduled':'s-meeting','Follow-up Needed':'s-followup','Verbal Agreement':'s-verbal','Pending Contract':'s-pending','Contract Signed':'s-signed','Partnership Active':'s-active','Partnership Expired':'s-expired'};
-const SCOLORS={'Not Contacted':'#bdc3c7','Contacted':'#3498db','Awaiting Response':'#f1c40f','Feedback Received':'#2ecc71','Meeting Scheduled':'#9b59b6','Follow-up Needed':'#e67e22','Verbal Agreement':'#1abc9c','Pending Contract':'#f39c12','Contract Signed':'#27ae60','Partnership Active':'#1e8449','Partnership Expired':'#e74c3c'};
+const SCLS={'Not Contacted':'s-not-contacted','Contacted':'s-contacted','Awaiting Response':'s-awaiting','Feedback Received':'s-feedback','Meeting Scheduled':'s-meeting','Follow-up Needed':'s-followup','Verbal Agreement':'s-verbal','Pending Contract':'s-pending','Contract Signed':'s-signed','Partnership Active':'s-active','Partnership Expired':'s-expired','Not Accepting Agencies':'s-not-accepting','Closed / Lost':'s-closed'};
+const SCOLORS={'Not Contacted':'#bdc3c7','Contacted':'#3498db','Awaiting Response':'#f1c40f','Feedback Received':'#2ecc71','Meeting Scheduled':'#9b59b6','Follow-up Needed':'#e67e22','Verbal Agreement':'#1abc9c','Pending Contract':'#f39c12','Contract Signed':'#27ae60','Partnership Active':'#1e8449','Partnership Expired':'#e74c3c','Not Accepting Agencies':'#c0392b','Closed / Lost':'#4a4a4a'};
 const CO=['Lithuania','Romania','Latvia','Luxembourg','Czech Republic','Belgium','Ireland','Netherlands'];
-const SO=['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired'];
+const SO=['Not Contacted','Contacted','Awaiting Response','Feedback Received','Meeting Scheduled','Follow-up Needed','Verbal Agreement','Pending Contract','Contract Signed','Partnership Active','Partnership Expired','Not Accepting Agencies'];
 
 function cTimer(end){if(!end)return null;const t=new Date();t.setHours(0,0,0,0);const diff=Math.ceil((new Date(end)-t)/86400000);if(diff<0)return{cls:'timer-expired',label:'Expired'};if(diff<=90)return{cls:'timer-warning',label:`${diff}d left`};return{cls:'timer-active',label:`${Math.floor(diff/30)}m left`};}
 
