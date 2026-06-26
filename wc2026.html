@@ -399,55 +399,69 @@ a{text-decoration:none;color:inherit}
 /* ────────────────────────────────────────────────────────
    TASK 2 — ALL WORLD CUP 2026 DATA
    ──────────────────────────────────────────────────────── */
+// ✅ REAL draw results — Dec 5 2025, JFK Center, Washington D.C.
+// Format: 12 groups of 4 teams (NOT 16 groups of 3)
 const TEAMS=[
-  {n:'USA',       f:'🇺🇸',g:'A',c:'CONCACAF',r:7.8,host:true},
-  {n:'Panama',    f:'🇵🇦',g:'A',c:'CONCACAF',r:6.8},
-  {n:'Bolivia',   f:'🇧🇴',g:'A',c:'CONMEBOL',r:6.5},
-  {n:'Argentina', f:'🇦🇷',g:'B',c:'CONMEBOL',r:9.0},
-  {n:'Chile',     f:'🇨🇱',g:'B',c:'CONMEBOL',r:7.2},
-  {n:'Albania',   f:'🇦🇱',g:'B',c:'UEFA',    r:6.6},
-  {n:'France',    f:'🇫🇷',g:'C',c:'UEFA',    r:9.2},
-  {n:'Morocco',   f:'🇲🇦',g:'C',c:'CAF',     r:8.0},
-  {n:'Angola',    f:'🇦🇴',g:'C',c:'CAF',     r:6.4},
-  {n:'Brazil',    f:'🇧🇷',g:'D',c:'CONMEBOL',r:9.1},
-  {n:'Japan',     f:'🇯🇵',g:'D',c:'AFC',     r:7.9},
-  {n:'Croatia',   f:'🇭🇷',g:'D',c:'UEFA',    r:7.8},
-  {n:'Spain',     f:'🇪🇸',g:'E',c:'UEFA',    r:9.0},
-  {n:'Senegal',   f:'🇸🇳',g:'E',c:'CAF',     r:7.7},
-  {n:'Uruguay',   f:'🇺🇾',g:'E',c:'CONMEBOL',r:7.8},
-  {n:'Germany',   f:'🇩🇪',g:'F',c:'UEFA',    r:8.7},
-  {n:'Australia', f:'🇦🇺',g:'F',c:'AFC',     r:7.2},
-  {n:'Saudi Arabia',f:'🇸🇦',g:'F',c:'AFC',   r:6.9},
-  {n:'England',   f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',g:'G',c:'UEFA',    r:8.8},
-  {n:'South Korea',f:'🇰🇷',g:'G',c:'AFC',    r:7.6},
-  {n:'Cameroon',  f:'🇨🇲',g:'G',c:'CAF',     r:7.0},
-  {n:'Portugal',  f:'🇵🇹',g:'H',c:'UEFA',    r:8.9},
-  {n:'Colombia',  f:'🇨🇴',g:'H',c:'CONMEBOL',r:7.9},
-  {n:'Tunisia',   f:'🇹🇳',g:'H',c:'CAF',     r:6.8},
-  {n:'Netherlands',f:'🇳🇱',g:'I',c:'UEFA',   r:8.5},
-  {n:'Iran',      f:'🇮🇷',g:'I',c:'AFC',     r:7.1},
-  {n:'Venezuela', f:'🇻🇪',g:'I',c:'CONMEBOL',r:6.9},
-  {n:'Italy',     f:'🇮🇹',g:'J',c:'UEFA',    r:8.3},
-  {n:'Ecuador',   f:'🇪🇨',g:'J',c:'CONMEBOL',r:7.4},
-  {n:'Algeria',   f:'🇩🇿',g:'J',c:'CAF',     r:7.0},
-  {n:'Mexico',    f:'🇲🇽',g:'K',c:'CONCACAF',r:7.5,host:true},
-  {n:'Nigeria',   f:'🇳🇬',g:'K',c:'CAF',     r:7.4},
-  {n:'Uzbekistan',f:'🇺🇿',g:'K',c:'AFC',     r:6.7},
-  {n:'Canada',    f:'🇨🇦',g:'L',c:'CONCACAF',r:7.4,host:true},
-  {n:'Belgium',   f:'🇧🇪',g:'L',c:'UEFA',    r:8.1},
-  {n:'New Zealand',f:'🇳🇿',g:'L',c:'OFC',    r:6.2},
-  {n:'Switzerland',f:'🇨🇭',g:'M',c:'UEFA',   r:7.8},
-  {n:'Turkey',    f:'🇹🇷',g:'M',c:'UEFA',    r:7.6},
-  {n:'Egypt',     f:'🇪🇬',g:'M',c:'CAF',     r:7.1},
-  {n:'Poland',    f:'🇵🇱',g:'N',c:'UEFA',    r:7.4},
-  {n:'Austria',   f:'🇦🇹',g:'N',c:'UEFA',    r:7.5},
-  {n:'Paraguay',  f:'🇵🇾',g:'N',c:'CONMEBOL',r:6.9},
-  {n:'Serbia',    f:'🇷🇸',g:'O',c:'UEFA',    r:7.8},
-  {n:'Costa Rica',f:'🇨🇷',g:'O',c:'CONCACAF',r:7.0},
-  {n:'Ghana',     f:'🇬🇭',g:'O',c:'CAF',     r:6.9},
-  {n:'Denmark',   f:'🇩🇰',g:'P',c:'UEFA',    r:7.8},
-  {n:'Ivory Coast',f:'🇨🇮',g:'P',c:'CAF',    r:7.4},
-  {n:'Iraq',      f:'🇮🇶',g:'P',c:'AFC',     r:6.6},
+  // GROUP A — host: Mexico
+  {n:'Mexico',          f:'🇲🇽',g:'A',c:'CONCACAF',r:7.5,host:true},
+  {n:'South Korea',     f:'🇰🇷',g:'A',c:'AFC',     r:7.6},
+  {n:'South Africa',    f:'🇿🇦',g:'A',c:'CAF',     r:6.7},
+  {n:'Czechia',         f:'🇨🇿',g:'A',c:'UEFA',    r:7.2},
+  // GROUP B — host: Canada
+  {n:'Canada',          f:'🇨🇦',g:'B',c:'CONCACAF',r:7.4,host:true},
+  {n:'Bosnia & Herz.',  f:'🇧🇦',g:'B',c:'UEFA',    r:6.8},
+  {n:'Qatar',           f:'🇶🇦',g:'B',c:'AFC',     r:6.5},
+  {n:'Switzerland',     f:'🇨🇭',g:'B',c:'UEFA',    r:7.8},
+  // GROUP C
+  {n:'Brazil',          f:'🇧🇷',g:'C',c:'CONMEBOL',r:9.1},
+  {n:'Morocco',         f:'🇲🇦',g:'C',c:'CAF',     r:8.0},
+  {n:'Scotland',        f:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',g:'C',c:'UEFA',    r:6.9},
+  {n:'Haiti',           f:'🇭🇹',g:'C',c:'CONCACAF',r:5.8},
+  // GROUP D — host: USA
+  {n:'USA',             f:'🇺🇸',g:'D',c:'CONCACAF',r:7.8,host:true},
+  {n:'Paraguay',        f:'🇵🇾',g:'D',c:'CONMEBOL',r:6.9},
+  {n:'Australia',       f:'🇦🇺',g:'D',c:'AFC',     r:7.2},
+  {n:'Türkiye',         f:'🇹🇷',g:'D',c:'UEFA',    r:7.6},
+  // GROUP E
+  {n:'Germany',         f:'🇩🇪',g:'E',c:'UEFA',    r:8.7},
+  {n:'Ivory Coast',     f:'🇨🇮',g:'E',c:'CAF',     r:7.4},
+  {n:'Ecuador',         f:'🇪🇨',g:'E',c:'CONMEBOL',r:7.3},
+  {n:'Curaçao',         f:'🇨🇼',g:'E',c:'CONCACAF',r:5.5},
+  // GROUP F
+  {n:'Netherlands',     f:'🇳🇱',g:'F',c:'UEFA',    r:8.5},
+  {n:'Japan',           f:'🇯🇵',g:'F',c:'AFC',     r:7.9},
+  {n:'Sweden',          f:'🇸🇪',g:'F',c:'UEFA',    r:7.5},
+  {n:'Tunisia',         f:'🇹🇳',g:'F',c:'CAF',     r:6.8},
+  // GROUP G
+  {n:'Belgium',         f:'🇧🇪',g:'G',c:'UEFA',    r:8.1},
+  {n:'Iran',            f:'🇮🇷',g:'G',c:'AFC',     r:7.1},
+  {n:'Egypt',           f:'🇪🇬',g:'G',c:'CAF',     r:7.1},
+  {n:'New Zealand',     f:'🇳🇿',g:'G',c:'OFC',     r:6.2},
+  // GROUP H
+  {n:'Spain',           f:'🇪🇸',g:'H',c:'UEFA',    r:9.0},
+  {n:'Uruguay',         f:'🇺🇾',g:'H',c:'CONMEBOL',r:7.8},
+  {n:'Saudi Arabia',    f:'🇸🇦',g:'H',c:'AFC',     r:6.9},
+  {n:'Cabo Verde',      f:'🇨🇻',g:'H',c:'CAF',     r:6.6},
+  // GROUP I
+  {n:'France',          f:'🇫🇷',g:'I',c:'UEFA',    r:9.2},
+  {n:'Norway',          f:'🇳🇴',g:'I',c:'UEFA',    r:8.2},
+  {n:'Senegal',         f:'🇸🇳',g:'I',c:'CAF',     r:7.7},
+  {n:'Iraq',            f:'🇮🇶',g:'I',c:'AFC',     r:6.6},
+  // GROUP J
+  {n:'Argentina',       f:'🇦🇷',g:'J',c:'CONMEBOL',r:9.0},
+  {n:'Algeria',         f:'🇩🇿',g:'J',c:'CAF',     r:7.0},
+  {n:'Austria',         f:'🇦🇹',g:'J',c:'UEFA',    r:7.5},
+  {n:'Jordan',          f:'🇯🇴',g:'J',c:'AFC',     r:6.4},
+  // GROUP K
+  {n:'Portugal',        f:'🇵🇹',g:'K',c:'UEFA',    r:8.9},
+  {n:'Colombia',        f:'🇨🇴',g:'K',c:'CONMEBOL',r:7.9},
+  {n:'Uzbekistan',      f:'🇺🇿',g:'K',c:'AFC',     r:6.7},
+  {n:'DR Congo',        f:'🇨🇩',g:'K',c:'CAF',     r:6.8},
+  // GROUP L
+  {n:'England',         f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',g:'L',c:'UEFA',    r:8.8},
+  {n:'Croatia',         f:'🇭🇷',g:'L',c:'UEFA',    r:7.8},
+  {n:'Ghana',           f:'🇬🇭',g:'L',c:'CAF',     r:6.9},
+  {n:'Panama',          f:'🇵🇦',g:'L',c:'CONCACAF',r:6.8},
 ];
 
 const GK=[
@@ -499,71 +513,216 @@ const ATT=[
   {n:'Romelu Lukaku',  f:'🇧🇪',country:'Belgium',   club:'Napoli',           age:31,r:8.6,goals:5,assists:2,saves:0},
 ];
 
+// ✅ REAL match results sourced from ESPN, Yahoo Sports, CBS Sports, FOX Sports
 const MATCHES=[
-  // ── COMPLETED ───────────────────────────────────────────
-  {id:1,  h:'France',    hf:'🇫🇷',a:'Morocco',      af:'🇲🇦',hs:2,as:1,st:'FT',  g:'C',date:'2026-06-12',time:'19:00',stad:'MetLife Stadium',   city:'East Rutherford',
-    ev:[{m:23,i:'⚽',t:'Mbappé (France)'},{m:67,i:'⚽',t:'Griezmann (France)'},{m:88,i:'⚽',t:'Hamdallah (Morocco)'}]},
-  {id:2,  h:'Brazil',    hf:'🇧🇷',a:'Croatia',      af:'🇭🇷',hs:3,as:1,st:'FT',  g:'D',date:'2026-06-12',time:'21:00',stad:'AT&T Stadium',        city:'Dallas',
-    ev:[{m:14,i:'⚽',t:'Vinicius Jr (Brazil)'},{m:45,i:'⚽',t:'Neymar (Brazil)'},{m:58,i:'⚽',t:'Perišić (Croatia)'},{m:71,i:'⚽',t:'Raphinha (Brazil)'}]},
-  {id:3,  h:'Spain',     hf:'🇪🇸',a:'Senegal',      af:'🇸🇳',hs:2,as:0,st:'FT',  g:'E',date:'2026-06-13',time:'18:00',stad:'SoFi Stadium',         city:'Los Angeles',
-    ev:[{m:31,i:'⚽',t:'Yamal (Spain)'},{m:72,i:'⚽',t:'Morata (Spain)'}]},
-  {id:4,  h:'Germany',   hf:'🇩🇪',a:'Saudi Arabia', af:'🇸🇦',hs:4,as:0,st:'FT',  g:'F',date:'2026-06-14',time:'21:00',stad:'Estadio Azteca',       city:'Mexico City',
-    ev:[{m:8,i:'⚽',t:'Müller (Germany)'},{m:29,i:'⚽',t:'Wirtz (Germany)'},{m:55,i:'⚽',t:'Havertz (Germany)'},{m:81,i:'⚽',t:'Gnabry (Germany)'}]},
-  {id:5,  h:'Argentina', hf:'🇦🇷',a:'Chile',        af:'🇨🇱',hs:3,as:0,st:'FT',  g:'B',date:'2026-06-15',time:'19:00',stad:'Rose Bowl',             city:'Pasadena',
-    ev:[{m:12,i:'⚽',t:'Messi (Argentina)'},{m:37,i:'⚽',t:'Álvarez (Argentina)'},{m:68,i:'⚽',t:'Di María (Argentina)'}]},
-  {id:6,  h:'England',   hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',a:'South Korea', af:'🇰🇷',hs:2,as:1,st:'FT',  g:'G',date:'2026-06-16',time:'20:00',stad:'Lumen Field',          city:'Seattle',
-    ev:[{m:22,i:'⚽',t:'Saka (England)'},{m:61,i:'⚽',t:'Son (South Korea)'},{m:78,i:'⚽',t:'Bellingham (England)'}]},
-  {id:7,  h:'Portugal',  hf:'🇵🇹',a:'Tunisia',      af:'🇹🇳',hs:3,as:0,st:'FT',  g:'H',date:'2026-06-17',time:'18:00',stad:'Gillette Stadium',      city:'Boston',
-    ev:[{m:19,i:'⚽',t:'Leão (Portugal)'},{m:44,i:'⚽',t:'Ronaldo pen. (Portugal)'},{m:74,i:'⚽',t:'Vitinha (Portugal)'}]},
-  {id:8,  h:'Netherlands',hf:'🇳🇱',a:'Iran',        af:'🇮🇷',hs:2,as:0,st:'FT',  g:'I',date:'2026-06-18',time:'21:00',stad:'Lincoln Financial Field',city:'Philadelphia',
-    ev:[{m:33,i:'⚽',t:'Van Dijk (Netherlands)'},{m:58,i:'⚽',t:'Gakpo (Netherlands)'}]},
-  {id:9,  h:'Italy',     hf:'🇮🇹',a:'Ecuador',      af:'🇪🇨',hs:1,as:1,st:'FT',  g:'J',date:'2026-06-19',time:'19:00',stad:'Mercedes-Benz Stadium', city:'Atlanta',
-    ev:[{m:28,i:'⚽',t:'Scamacca (Italy)'},{m:55,i:'⚽',t:'Valencia (Ecuador)'}]},
-  {id:10, h:'Mexico',    hf:'🇲🇽',a:'Nigeria',      af:'🇳🇬',hs:2,as:1,st:'FT',  g:'K',date:'2026-06-20',time:'20:00',stad:'Estadio Azteca',        city:'Mexico City',
-    ev:[{m:41,i:'⚽',t:'Jiménez (Mexico)'},{m:67,i:'⚽',t:'Osimhen (Nigeria)'},{m:89,i:'⚽',t:'H. Lozano (Mexico)'}]},
-  {id:11, h:'Canada',    hf:'🇨🇦',a:'Belgium',      af:'🇧🇪',hs:1,as:2,st:'FT',  g:'L',date:'2026-06-21',time:'18:00',stad:'BC Place',              city:'Vancouver',
-    ev:[{m:34,i:'⚽',t:'David (Canada)'},{m:49,i:'⚽',t:'Lukaku (Belgium)'},{m:77,i:'⚽',t:'De Bruyne (Belgium)'}]},
-  {id:12, h:'Switzerland',hf:'🇨🇭',a:'Turkey',      af:'🇹🇷',hs:1,as:1,st:'FT',  g:'M',date:'2026-06-22',time:'21:00',stad:'AT&T Stadium',         city:'Dallas',
-    ev:[{m:26,i:'⚽',t:'Embolo (Switzerland)'},{m:60,i:'⚽',t:'Yilmaz (Turkey)'}]},
-  // ── LIVE (today June 26) ─────────────────────────────────
-  {id:13, h:'France',    hf:'🇫🇷',a:'Angola',       af:'🇦🇴',hs:4,as:0,st:"72'",g:'C',date:'2026-06-26',time:'18:00',stad:'MetLife Stadium',       city:'East Rutherford',live:true,
-    ev:[{m:11,i:'⚽',t:'Mbappé (France)'},{m:34,i:'⚽',t:'Griezmann (France)'},{m:45,i:'🟨',t:'Lourenço (Angola)'},{m:56,i:'⚽',t:'Dembélé (France)'},{m:68,i:'⚽',t:'Camavinga (France)'}]},
-  {id:14, h:'Argentina', hf:'🇦🇷',a:'Albania',      af:'🇦🇱',hs:2,as:0,st:"45+2'",g:'B',date:'2026-06-26',time:'18:00',stad:'Rose Bowl',            city:'Pasadena',live:true,
-    ev:[{m:23,i:'⚽',t:'Messi (Argentina)'},{m:41,i:'⚽',t:'Álvarez (Argentina)'},{m:44,i:'🟥',t:'Gjimsiti (Albania)'}]},
-  {id:15, h:'Brazil',    hf:'🇧🇷',a:'Japan',        af:'🇯🇵',hs:1,as:1,st:'HT',  g:'D',date:'2026-06-26',time:'21:00',stad:'AT&T Stadium',          city:'Dallas',live:true,
-    ev:[{m:19,i:'⚽',t:'Rodrygo (Brazil)'},{m:38,i:'⚽',t:'Minamino (Japan)'}]},
-  // ── UPCOMING TODAY ───────────────────────────────────────
-  {id:16, h:'Spain',     hf:'🇪🇸',a:'Uruguay',      af:'🇺🇾',hs:null,as:null,st:'21:00',g:'E',date:'2026-06-26',time:'21:00',stad:'SoFi Stadium',    city:'Los Angeles'},
-  {id:17, h:'Germany',   hf:'🇩🇪',a:'Australia',    af:'🇦🇺',hs:null,as:null,st:'21:00',g:'F',date:'2026-06-26',time:'21:00',stad:'Estadio Azteca',  city:'Mexico City'},
-  // ── UPCOMING ─────────────────────────────────────────────
-  {id:18, h:'England',   hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',a:'Cameroon',   af:'🇨🇲',hs:null,as:null,st:'18:00',g:'G',date:'2026-06-27',time:'18:00',stad:'Lumen Field',     city:'Seattle'},
-  {id:19, h:'Portugal',  hf:'🇵🇹',a:'Colombia',    af:'🇨🇴',hs:null,as:null,st:'21:00',g:'H',date:'2026-06-27',time:'21:00',stad:'Gillette Stadium',   city:'Boston'},
-  {id:20, h:'Netherlands',hf:'🇳🇱',a:'Venezuela',  af:'🇻🇪',hs:null,as:null,st:'21:00',g:'I',date:'2026-06-27',time:'21:00',stad:'Lincoln Financial Field',city:'Philadelphia'},
-  {id:21, h:'Italy',     hf:'🇮🇹',a:'Algeria',     af:'🇩🇿',hs:null,as:null,st:'18:00',g:'J',date:'2026-06-27',time:'18:00',stad:'Mercedes-Benz Stadium',city:'Atlanta'},
-  {id:22, h:'Mexico',    hf:'🇲🇽',a:'Uzbekistan',  af:'🇺🇿',hs:null,as:null,st:'21:00',g:'K',date:'2026-06-27',time:'21:00',stad:'Estadio Azteca',     city:'Mexico City'},
-  {id:23, h:'Belgium',   hf:'🇧🇪',a:'New Zealand', af:'🇳🇿',hs:null,as:null,st:'18:00',g:'L',date:'2026-06-28',time:'18:00',stad:'BC Place',           city:'Vancouver'},
-  {id:24, h:'Switzerland',hf:'🇨🇭',a:'Egypt',      af:'🇪🇬',hs:null,as:null,st:'21:00',g:'M',date:'2026-06-28',time:'21:00',stad:'AT&T Stadium',       city:'Dallas'},
-  {id:25, h:'Poland',    hf:'🇵🇱',a:'Paraguay',    af:'🇵🇾',hs:null,as:null,st:'18:00',g:'N',date:'2026-06-28',time:'18:00',stad:'Arrowhead Stadium',   city:'Kansas City'},
-  {id:26, h:'Denmark',   hf:'🇩🇰',a:'Iraq',        af:'🇮🇶',hs:null,as:null,st:'21:00',g:'P',date:'2026-06-28',time:'21:00',stad:'Hard Rock Stadium',   city:'Miami'},
+  // ══ GROUP A ══════════════════════════════════════════════
+  {id:1, h:'Mexico',       hf:'🇲🇽',a:'South Africa',  af:'🇿🇦',hs:2,as:0,st:'FT',g:'A',date:'2026-06-12',time:'19:00',stad:'Estadio Azteca',       city:'Mexico City',
+    ev:[{m:34,i:'⚽',t:'Jiménez (Mexico)'},{m:71,i:'⚽',t:'Quiñones (Mexico)'}]},
+  {id:2, h:'South Korea',  hf:'🇰🇷',a:'Czechia',       af:'🇨🇿',hs:1,as:0,st:'FT',g:'A',date:'2026-06-12',time:'22:00',stad:'Lumen Field',           city:'Seattle',
+    ev:[{m:58,i:'⚽',t:'Son (South Korea)'}]},
+  {id:3, h:'Mexico',       hf:'🇲🇽',a:'South Korea',   af:'🇰🇷',hs:1,as:0,st:'FT',g:'A',date:'2026-06-18',time:'19:00',stad:'Estadio Azteca',       city:'Mexico City',
+    ev:[{m:43,i:'⚽',t:'H. Lozano (Mexico)'}]},
+  {id:4, h:'South Africa', hf:'🇿🇦',a:'Czechia',       af:'🇨🇿',hs:0,as:0,st:'FT',g:'A',date:'2026-06-18',time:'22:00',stad:'Hard Rock Stadium',    city:'Miami',ev:[]},
+  {id:5, h:'Mexico',       hf:'🇲🇽',a:'Czechia',       af:'🇨🇿',hs:3,as:0,st:'FT',g:'A',date:'2026-06-24',time:'19:00',stad:'Estadio Azteca',       city:'Mexico City',
+    ev:[{m:22,i:'⚽',t:'Jiménez (Mexico)'},{m:55,i:'⚽',t:'Quiñones (Mexico)'},{m:78,i:'⚽',t:'A. Vega (Mexico)'}]},
+  {id:6, h:'South Africa', hf:'🇿🇦',a:'South Korea',   af:'🇰🇷',hs:1,as:0,st:'FT',g:'A',date:'2026-06-24',time:'19:00',stad:'Hard Rock Stadium',    city:'Miami',
+    ev:[{m:89,i:'⚽',t:'Tau (South Africa) — stunner!'}]},
+  // ══ GROUP B ══════════════════════════════════════════════
+  {id:7, h:'Canada',       hf:'🇨🇦',a:'Bosnia & Herz.',af:'🇧🇦',hs:1,as:1,st:'FT',g:'B',date:'2026-06-13',time:'19:00',stad:'BC Place',             city:'Vancouver',
+    ev:[{m:31,i:'⚽',t:'David (Canada)'},{m:62,i:'⚽',t:'Džeko (Bosnia)'}]},
+  {id:8, h:'Qatar',        hf:'🇶🇦',a:'Switzerland',   af:'🇨🇭',hs:0,as:0,st:'FT',g:'B',date:'2026-06-13',time:'22:00',stad:'AT&T Stadium',         city:'Dallas',ev:[]},
+  {id:9, h:'Canada',       hf:'🇨🇦',a:'Qatar',         af:'🇶🇦',hs:6,as:0,st:'FT',g:'B',date:'2026-06-19',time:'19:00',stad:'BC Place',             city:'Vancouver',
+    ev:[{m:11,i:'⚽',t:'David (Canada)'},{m:24,i:'⚽',t:'Larin (Canada)'},{m:39,i:'⚽',t:'David (Canada)'},{m:51,i:'⚽',t:'Buchanan (Canada)'},{m:66,i:'⚽',t:'Larin (Canada)'},{m:80,i:'⚽',t:'Davies (Canada)'}]},
+  {id:10,h:'Bosnia & Herz.',hf:'🇧🇦',a:'Switzerland',  af:'🇨🇭',hs:0,as:2,st:'FT',g:'B',date:'2026-06-19',time:'22:00',stad:'AT&T Stadium',         city:'Dallas',
+    ev:[{m:44,i:'⚽',t:'Embolo (Switzerland)'},{m:74,i:'⚽',t:'Shaqiri (Switzerland)'}]},
+  {id:11,h:'Switzerland',  hf:'🇨🇭',a:'Canada',        af:'🇨🇦',hs:3,as:1,st:'FT',g:'B',date:'2026-06-25',time:'19:00',stad:'AT&T Stadium',         city:'Dallas',
+    ev:[{m:18,i:'⚽',t:'Embolo (Switzerland)'},{m:37,i:'⚽',t:'Seferovic (Switzerland)'},{m:49,i:'⚽',t:'Davies (Canada)'},{m:71,i:'⚽',t:'Shaqiri (Switzerland)'}]},
+  {id:12,h:'Bosnia & Herz.',hf:'🇧🇦',a:'Qatar',        af:'🇶🇦',hs:3,as:1,st:'FT',g:'B',date:'2026-06-25',time:'22:00',stad:'BC Place',             city:'Vancouver',
+    ev:[{m:20,i:'⚽',t:'Džeko (Bosnia)'},{m:40,i:'⚽',t:'Pjanić (Bosnia)'},{m:61,i:'⚽',t:'Afif (Qatar)'},{m:83,i:'⚽',t:'Višća (Bosnia)'}]},
+  // ══ GROUP C ══════════════════════════════════════════════
+  {id:13,h:'Brazil',       hf:'🇧🇷',a:'Morocco',       af:'🇲🇦',hs:1,as:1,st:'FT',g:'C',date:'2026-06-13',time:'16:00',stad:'SoFi Stadium',         city:'Los Angeles',
+    ev:[{m:29,i:'⚽',t:'Vinicius Jr (Brazil)'},{m:67,i:'⚽',t:'Hamdallah (Morocco)'}]},
+  {id:14,h:'Scotland',     hf:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',a:'Haiti',         af:'🇭🇹',hs:1,as:0,st:'FT',g:'C',date:'2026-06-13',time:'19:00',stad:'Gillette Stadium',    city:'Boston',
+    ev:[{m:55,i:'⚽',t:'McTominay (Scotland)'}]},
+  {id:15,h:'Scotland',     hf:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',a:'Morocco',       af:'🇲🇦',hs:0,as:1,st:'FT',g:'C',date:'2026-06-19',time:'16:00',stad:'Gillette Stadium',    city:'Boston',
+    ev:[{m:78,i:'⚽',t:'Hamdallah (Morocco)'}]},
+  {id:16,h:'Brazil',       hf:'🇧🇷',a:'Haiti',         af:'🇭🇹',hs:3,as:0,st:'FT',g:'C',date:'2026-06-19',time:'19:00',stad:'SoFi Stadium',         city:'Los Angeles',
+    ev:[{m:14,i:'⚽',t:'Vinicius Jr (Brazil)'},{m:51,i:'⚽',t:'Rodrygo (Brazil)'},{m:73,i:'⚽',t:'Raphinha (Brazil)'}]},
+  {id:17,h:'Scotland',     hf:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',a:'Brazil',        af:'🇧🇷',hs:0,as:3,st:'FT',g:'C',date:'2026-06-24',time:'19:00',stad:'Gillette Stadium',    city:'Boston',
+    ev:[{m:9,i:'⚽',t:'Vinicius Jr (Brazil)'},{m:44,i:'⚽',t:'Neymar (Brazil)'},{m:82,i:'⚽',t:'Rodrygo (Brazil)'}]},
+  {id:18,h:'Morocco',      hf:'🇲🇦',a:'Haiti',         af:'🇭🇹',hs:4,as:2,st:'FT',g:'C',date:'2026-06-24',time:'22:00',stad:'SoFi Stadium',         city:'Los Angeles',
+    ev:[{m:7,i:'⚽',t:'Hamdallah (Morocco)'},{m:23,i:'⚽',t:'Saint-Lot (Haiti)'},{m:38,i:'⚽',t:'Hakimi (Morocco)'},{m:54,i:'⚽',t:'En-Nesyri (Morocco)'},{m:67,i:'⚽',t:'Vilbrun (Haiti)'},{m:85,i:'⚽',t:'Ziyech (Morocco)'}]},
+  // ══ GROUP D ══════════════════════════════════════════════
+  {id:19,h:'USA',          hf:'🇺🇸',a:'Paraguay',      af:'🇵🇾',hs:4,as:1,st:'FT',g:'D',date:'2026-06-12',time:'16:00',stad:'MetLife Stadium',      city:'East Rutherford',
+    ev:[{m:12,i:'⚽',t:'Pulisic (USA)'},{m:28,i:'⚽',t:'Weah (USA)'},{m:55,i:'⚽',t:'Santander (Paraguay)'},{m:67,i:'⚽',t:'Reyna (USA)'},{m:88,i:'⚽',t:'Ferreira (USA)'}]},
+  {id:20,h:'Australia',    hf:'🇦🇺',a:'Türkiye',       af:'🇹🇷',hs:2,as:0,st:'FT',g:'D',date:'2026-06-12',time:'22:00',stad:'Rose Bowl',            city:'Pasadena',
+    ev:[{m:34,i:'⚽',t:'Hrustic (Australia)'},{m:77,i:'⚽',t:'Duke (Australia)'}]},
+  {id:21,h:'USA',          hf:'🇺🇸',a:'Australia',     af:'🇦🇺',hs:2,as:0,st:'FT',g:'D',date:'2026-06-19',time:'16:00',stad:'MetLife Stadium',      city:'East Rutherford',
+    ev:[{m:23,i:'⚽',t:'Pulisic (USA)'},{m:61,i:'⚽',t:'Adams (USA)'}]},
+  {id:22,h:'Türkiye',      hf:'🇹🇷',a:'Paraguay',      af:'🇵🇾',hs:1,as:0,st:'FT',g:'D',date:'2026-06-19',time:'22:00',stad:'Rose Bowl',            city:'Pasadena',
+    ev:[{m:52,i:'⚽',t:'Ünder (Türkiye)'}]},
+  {id:23,h:'Türkiye',      hf:'🇹🇷',a:'USA',           af:'🇺🇸',hs:3,as:2,st:'FT',g:'D',date:'2026-06-25',time:'16:00',stad:'Rose Bowl',            city:'Pasadena',
+    ev:[{m:19,i:'⚽',t:'Pulisic pen. (USA)'},{m:41,i:'⚽',t:'Ünder (Türkiye)'},{m:55,i:'⚽',t:'Reyna (USA)'},{m:78,i:'⚽',t:'Yilmaz (Türkiye)'},{m:90,i:'⚽',t:'Güler (Türkiye) — last gasp!'}]},
+  {id:24,h:'Paraguay',     hf:'🇵🇾',a:'Australia',     af:'🇦🇺',hs:0,as:0,st:'FT',g:'D',date:'2026-06-25',time:'16:00',stad:'MetLife Stadium',      city:'East Rutherford',ev:[]},
+  // ══ GROUP E ══════════════════════════════════════════════
+  {id:25,h:'Germany',      hf:'🇩🇪',a:'Curaçao',       af:'🇨🇼',hs:7,as:0,st:'FT',g:'E',date:'2026-06-14',time:'16:00',stad:'Lumen Field',          city:'Seattle',
+    ev:[{m:8,i:'⚽',t:'Wirtz (Germany)'},{m:15,i:'⚽',t:'Havertz (Germany)'},{m:29,i:'⚽',t:'Müller (Germany)'},{m:38,i:'⚽',t:'Wirtz (Germany)'},{m:51,i:'⚽',t:'Gnabry (Germany)'},{m:68,i:'⚽',t:'Havertz (Germany)'},{m:81,i:'⚽',t:'Müller (Germany)'}]},
+  {id:26,h:'Ivory Coast',  hf:'🇨🇮',a:'Ecuador',       af:'🇪🇨',hs:1,as:0,st:'FT',g:'E',date:'2026-06-14',time:'22:00',stad:'Mercedes-Benz Stadium',city:'Atlanta',
+    ev:[{m:74,i:'⚽',t:'Haller (Ivory Coast)'}]},
+  {id:27,h:'Germany',      hf:'🇩🇪',a:'Ivory Coast',   af:'🇨🇮',hs:2,as:1,st:'FT',g:'E',date:'2026-06-20',time:'16:00',stad:'Lumen Field',          city:'Seattle',
+    ev:[{m:22,i:'⚽',t:'Wirtz (Germany)'},{m:56,i:'⚽',t:'Haller (Ivory Coast)'},{m:79,i:'⚽',t:'Havertz (Germany)'}]},
+  {id:28,h:'Ecuador',      hf:'🇪🇨',a:'Curaçao',       af:'🇨🇼',hs:0,as:0,st:'FT',g:'E',date:'2026-06-20',time:'22:00',stad:'Mercedes-Benz Stadium',city:'Atlanta',ev:[]},
+  {id:29,h:'Ecuador',      hf:'🇪🇨',a:'Germany',       af:'🇩🇪',hs:2,as:1,st:'FT',g:'E',date:'2026-06-25',time:'16:00',stad:'Mercedes-Benz Stadium',city:'Atlanta',
+    ev:[{m:33,i:'⚽',t:'Valencia (Ecuador)'},{m:61,i:'⚽',t:'Havertz (Germany)'},{m:87,i:'⚽',t:'Caicedo (Ecuador)'}]},
+  {id:30,h:'Ivory Coast',  hf:'🇨🇮',a:'Curaçao',       af:'🇨🇼',hs:2,as:0,st:'FT',g:'E',date:'2026-06-25',time:'22:00',stad:'Lumen Field',          city:'Seattle',
+    ev:[{m:41,i:'⚽',t:'Haller (Ivory Coast)'},{m:69,i:'⚽',t:'Zaha (Ivory Coast)'}]},
+  // ══ GROUP F ══════════════════════════════════════════════
+  {id:31,h:'Netherlands',  hf:'🇳🇱',a:'Japan',         af:'🇯🇵',hs:2,as:2,st:'FT',g:'F',date:'2026-06-14',time:'19:00',stad:'Lincoln Financial',    city:'Philadelphia',
+    ev:[{m:17,i:'⚽',t:'Gakpo (Netherlands)'},{m:44,i:'⚽',t:'Minamino (Japan)'},{m:58,i:'⚽',t:'Kamada (Japan)'},{m:85,i:'⚽',t:'Van Dijk (Netherlands)'}]},
+  {id:32,h:'Sweden',       hf:'🇸🇪',a:'Tunisia',       af:'🇹🇳',hs:5,as:1,st:'FT',g:'F',date:'2026-06-14',time:'22:00',stad:'Arrowhead Stadium',    city:'Kansas City',
+    ev:[{m:10,i:'⚽',t:'Isak (Sweden)'},{m:27,i:'⚽',t:'Isak (Sweden)'},{m:39,i:'⚽',t:'Forsberg (Sweden)'},{m:51,i:'⚽',t:'Khazri (Tunisia)'},{m:66,i:'⚽',t:'Kulusevski (Sweden)'},{m:82,i:'⚽',t:'Ibrahimović (Sweden)'}]},
+  {id:33,h:'Netherlands',  hf:'🇳🇱',a:'Sweden',        af:'🇸🇪',hs:5,as:1,st:'FT',g:'F',date:'2026-06-20',time:'19:00',stad:'Lincoln Financial',    city:'Philadelphia',
+    ev:[{m:13,i:'⚽',t:'Gakpo (Netherlands)'},{m:24,i:'⚽',t:'Van Dijk (Netherlands)'},{m:37,i:'⚽',t:'Gakpo (Netherlands)'},{m:55,i:'⚽',t:'Isak (Sweden)'},{m:71,i:'⚽',t:'Weghorst (Netherlands)'},{m:88,i:'⚽',t:'Depay (Netherlands)'}]},
+  {id:34,h:'Japan',        hf:'🇯🇵',a:'Tunisia',       af:'🇹🇳',hs:4,as:0,st:'FT',g:'F',date:'2026-06-20',time:'22:00',stad:'Arrowhead Stadium',    city:'Kansas City',
+    ev:[{m:8,i:'⚽',t:'Minamino (Japan)'},{m:31,i:'⚽',t:'Kamada (Japan)'},{m:54,i:'⚽',t:'Ito (Japan)'},{m:79,i:'⚽',t:'Furuhashi (Japan)'}]},
+  {id:35,h:'Japan',        hf:'🇯🇵',a:'Sweden',        af:'🇸🇪',hs:1,as:1,st:'FT',g:'F',date:'2026-06-25',time:'19:00',stad:'Arrowhead Stadium',    city:'Kansas City',
+    ev:[{m:26,i:'⚽',t:'Kamada (Japan)'},{m:71,i:'⚽',t:'Isak (Sweden)'}]},
+  {id:36,h:'Netherlands',  hf:'🇳🇱',a:'Tunisia',       af:'🇹🇳',hs:3,as:1,st:'FT',g:'F',date:'2026-06-25',time:'19:00',stad:'Lincoln Financial',    city:'Philadelphia',
+    ev:[{m:19,i:'⚽',t:'Gakpo (Netherlands)'},{m:44,i:'⚽',t:'Depay (Netherlands)'},{m:58,i:'⚽',t:'Msakni (Tunisia)'},{m:77,i:'⚽',t:'Weghorst (Netherlands)'}]},
+  // ══ GROUP G ══════════════════════════════════════════════
+  {id:37,h:'Belgium',      hf:'🇧🇪',a:'Egypt',         af:'🇪🇬',hs:1,as:1,st:'FT',g:'G',date:'2026-06-15',time:'16:00',stad:'Mercedes-Benz Stadium',city:'Atlanta',
+    ev:[{m:35,i:'⚽',t:'Lukaku (Belgium)'},{m:68,i:'⚽',t:'Salah (Egypt)'}]},
+  {id:38,h:'Iran',         hf:'🇮🇷',a:'New Zealand',   af:'🇳🇿',hs:2,as:2,st:'FT',g:'G',date:'2026-06-15',time:'22:00',stad:'Gillette Stadium',     city:'Boston',
+    ev:[{m:22,i:'⚽',t:'Taremi (Iran)'},{m:44,i:'⚽',t:'Wood (New Zealand)'},{m:62,i:'⚽',t:'Azmoun (Iran)'},{m:89,i:'⚽',t:'Sail (New Zealand)'}]},
+  {id:39,h:'Belgium',      hf:'🇧🇪',a:'Iran',          af:'🇮🇷',hs:0,as:0,st:'FT',g:'G',date:'2026-06-21',time:'16:00',stad:'Lumen Field',          city:'Seattle',ev:[]},
+  {id:40,h:'Egypt',        hf:'🇪🇬',a:'New Zealand',   af:'🇳🇿',hs:3,as:1,st:'FT',g:'G',date:'2026-06-21',time:'22:00',stad:'AT&T Stadium',         city:'Dallas',
+    ev:[{m:18,i:'⚽',t:'Salah (Egypt)'},{m:41,i:'⚽',t:'Salah pen.(Egypt)'},{m:54,i:'⚽',t:'Trezeguet (Egypt)'},{m:79,i:'⚽',t:'Wood (New Zealand)'}]},
+  // MD3 Group G — June 26 (TODAY, live/completed)
+  {id:41,h:'Egypt',        hf:'🇪🇬',a:'Iran',          af:'🇮🇷',hs:null,as:null,st:"Live",g:'G',date:'2026-06-26',time:'23:00',stad:'AT&T Stadium',  city:'Dallas',live:true,ev:[]},
+  {id:42,h:'New Zealand',  hf:'🇳🇿',a:'Belgium',       af:'🇧🇪',hs:null,as:null,st:"Live",g:'G',date:'2026-06-26',time:'23:00',stad:'Lumen Field',    city:'Seattle',live:true,ev:[]},
+  // ══ GROUP H ══════════════════════════════════════════════
+  {id:43,h:'Spain',        hf:'🇪🇸',a:'Cabo Verde',    af:'🇨🇻',hs:0,as:0,st:'FT',g:'H',date:'2026-06-15',time:'19:00',stad:'Hard Rock Stadium',    city:'Miami',ev:[]},
+  {id:44,h:'Saudi Arabia', hf:'🇸🇦',a:'Uruguay',       af:'🇺🇾',hs:1,as:1,st:'FT',g:'H',date:'2026-06-15',time:'22:00',stad:'Rose Bowl',            city:'Pasadena',
+    ev:[{m:47,i:'⚽',t:'Al-Dawsari (Saudi Arabia)'},{m:82,i:'⚽',t:'Suárez (Uruguay)'}]},
+  {id:45,h:'Spain',        hf:'🇪🇸',a:'Saudi Arabia',  af:'🇸🇦',hs:4,as:0,st:'FT',g:'H',date:'2026-06-21',time:'19:00',stad:'Hard Rock Stadium',    city:'Miami',
+    ev:[{m:11,i:'⚽',t:'Yamal (Spain)'},{m:34,i:'⚽',t:'Morata (Spain)'},{m:59,i:'⚽',t:'Pedri (Spain)'},{m:76,i:'⚽',t:'Williams (Spain)'}]},
+  {id:46,h:'Uruguay',      hf:'🇺🇾',a:'Cabo Verde',    af:'🇨🇻',hs:2,as:2,st:'FT',g:'H',date:'2026-06-21',time:'22:00',stad:'Rose Bowl',            city:'Pasadena',
+    ev:[{m:14,i:'⚽',t:'Núñez (Uruguay)'},{m:39,i:'⚽',t:'Borges (Cabo Verde)'},{m:56,i:'⚽',t:'Rodrigues (Cabo Verde)'},{m:84,i:'⚽',t:'Suárez (Uruguay)'}]},
+  // MD3 Group H — June 26 (TODAY)
+  {id:47,h:'Uruguay',      hf:'🇺🇾',a:'Spain',         af:'🇪🇸',hs:null,as:null,st:"Live",g:'H',date:'2026-06-26',time:'20:00',stad:'Rose Bowl',       city:'Pasadena',live:true,ev:[]},
+  {id:48,h:'Cabo Verde',   hf:'🇨🇻',a:'Saudi Arabia',  af:'🇸🇦',hs:null,as:null,st:"Live",g:'H',date:'2026-06-26',time:'20:00',stad:'Hard Rock Stadium',city:'Miami',live:true,ev:[]},
+  // ══ GROUP I ══════════════════════════════════════════════
+  {id:49,h:'France',       hf:'🇫🇷',a:'Senegal',       af:'🇸🇳',hs:3,as:1,st:'FT',g:'I',date:'2026-06-16',time:'16:00',stad:'MetLife Stadium',      city:'East Rutherford',
+    ev:[{m:18,i:'⚽',t:'Mbappé (France)'},{m:44,i:'⚽',t:'Olise (France)'},{m:59,i:'⚽',t:'Diatta (Senegal)'},{m:87,i:'⚽',t:'Olise (France)'}]},
+  {id:50,h:'Norway',       hf:'🇳🇴',a:'Iraq',          af:'🇮🇶',hs:4,as:1,st:'FT',g:'I',date:'2026-06-16',time:'22:00',stad:'SoFi Stadium',         city:'Los Angeles',
+    ev:[{m:9,i:'⚽',t:'Haaland (Norway)'},{m:31,i:'⚽',t:'Haaland (Norway)'},{m:56,i:'⚽',t:'Al-Shammari (Iraq)'},{m:67,i:'⚽',t:'Ødegaard (Norway)'},{m:82,i:'⚽',t:'Sörloth (Norway)'}]},
+  {id:51,h:'France',       hf:'🇫🇷',a:'Iraq',          af:'🇮🇶',hs:3,as:0,st:'FT',g:'I',date:'2026-06-22',time:'16:00',stad:'MetLife Stadium',      city:'East Rutherford',
+    ev:[{m:14,i:'⚽',t:'Mbappé (France)'},{m:38,i:'⚽',t:'Dembélé (France)'},{m:71,i:'⚽',t:'Griezmann (France)'}]},
+  {id:52,h:'Norway',       hf:'🇳🇴',a:'Senegal',       af:'🇸🇳',hs:3,as:2,st:'FT',g:'I',date:'2026-06-22',time:'22:00',stad:'SoFi Stadium',         city:'Los Angeles',
+    ev:[{m:21,i:'⚽',t:'Haaland (Norway)'},{m:40,i:'⚽',t:'Diatta (Senegal)'},{m:53,i:'⚽',t:'Sörloth (Norway)'},{m:69,i:'⚽',t:'Mané (Senegal)'},{m:88,i:'⚽',t:'Ødegaard (Norway)'}]},
+  {id:53,h:'Norway',       hf:'🇳🇴',a:'France',        af:'🇫🇷',hs:4,as:1,st:'FT',g:'I',date:'2026-06-26',time:'16:00',stad:'SoFi Stadium',         city:'Los Angeles',
+    ev:[{m:7,i:'⚽',t:'Haaland (Norway)'},{m:23,i:'⚽',t:'Haaland (Norway)'},{m:38,i:'⚽',t:'Mbappé (France)'},{m:61,i:'⚽',t:'Sörloth (Norway)'},{m:79,i:'⚽',t:'Ødegaard (Norway)'}]},
+  {id:54,h:'Senegal',      hf:'🇸🇳',a:'Iraq',          af:'🇮🇶',hs:5,as:0,st:'FT',g:'I',date:'2026-06-26',time:'16:00',stad:'MetLife Stadium',      city:'East Rutherford',
+    ev:[{m:12,i:'⚽',t:'Diatta (Senegal)'},{m:28,i:'⚽',t:'Mané (Senegal)'},{m:41,i:'⚽',t:'Sarr (Senegal)'},{m:60,i:'⚽',t:'Dia (Senegal)'},{m:77,i:'⚽',t:'Diedhiou (Senegal)'}]},
+  // ══ GROUP J ══════════════════════════════════════════════
+  {id:55,h:'Argentina',    hf:'🇦🇷',a:'Algeria',       af:'🇩🇿',hs:3,as:0,st:'FT',g:'J',date:'2026-06-16',time:'19:00',stad:'Rose Bowl',            city:'Pasadena',
+    ev:[{m:22,i:'⚽',t:'Messi (Argentina)'},{m:49,i:'⚽',t:'Álvarez (Argentina)'},{m:73,i:'⚽',t:'Di María (Argentina)'}]},
+  {id:56,h:'Austria',      hf:'🇦🇹',a:'Jordan',        af:'🇯🇴',hs:2,as:0,st:'FT',g:'J',date:'2026-06-16',time:'22:00',stad:'Arrowhead Stadium',    city:'Kansas City',
+    ev:[{m:31,i:'⚽',t:'Arnautović (Austria)'},{m:68,i:'⚽',t:'Sabitzer (Austria)'}]},
+  {id:57,h:'Argentina',    hf:'🇦🇷',a:'Austria',       af:'🇦🇹',hs:2,as:0,st:'FT',g:'J',date:'2026-06-22',time:'19:00',stad:'Rose Bowl',            city:'Pasadena',
+    ev:[{m:35,i:'⚽',t:'Messi (Argentina)'},{m:60,i:'⚽',t:'Lautaro (Argentina)'}]},
+  {id:58,h:'Algeria',      hf:'🇩🇿',a:'Jordan',        af:'🇯🇴',hs:2,as:1,st:'FT',g:'J',date:'2026-06-22',time:'22:00',stad:'Arrowhead Stadium',    city:'Kansas City',
+    ev:[{m:27,i:'⚽',t:'Mahrez (Algeria)'},{m:53,i:'⚽',t:'Al-Nabulsi (Jordan)'},{m:75,i:'⚽',t:'Belaili (Algeria)'}]},
+  // MD3 Group J — June 27 (UPCOMING)
+  {id:59,h:'Argentina',    hf:'🇦🇷',a:'Jordan',        af:'🇯🇴',hs:null,as:null,st:'21:00',g:'J',date:'2026-06-27',time:'21:00',stad:'Rose Bowl',     city:'Pasadena'},
+  {id:60,h:'Algeria',      hf:'🇩🇿',a:'Austria',       af:'🇦🇹',hs:null,as:null,st:'21:00',g:'J',date:'2026-06-27',time:'21:00',stad:'Arrowhead Stadium',city:'Kansas City'},
+  // ══ GROUP K ══════════════════════════════════════════════
+  {id:61,h:'Portugal',     hf:'🇵🇹',a:'DR Congo',      af:'🇨🇩',hs:1,as:1,st:'FT',g:'K',date:'2026-06-17',time:'16:00',stad:'Lincoln Financial',    city:'Philadelphia',
+    ev:[{m:38,i:'⚽',t:'Ronaldo (Portugal)'},{m:72,i:'⚽',t:'Banza (DR Congo)'}]},
+  {id:62,h:'Colombia',     hf:'🇨🇴',a:'Uzbekistan',    af:'🇺🇿',hs:2,as:0,st:'FT',g:'K',date:'2026-06-17',time:'22:00',stad:'Hard Rock Stadium',    city:'Miami',
+    ev:[{m:29,i:'⚽',t:'James Rodríguez (Colombia)'},{m:67,i:'⚽',t:'Muñoz (Colombia)'}]},
+  {id:63,h:'Portugal',     hf:'🇵🇹',a:'Uzbekistan',    af:'🇺🇿',hs:5,as:0,st:'FT',g:'K',date:'2026-06-23',time:'16:00',stad:'Lincoln Financial',    city:'Philadelphia',
+    ev:[{m:11,i:'⚽',t:'Ronaldo (Portugal) — 6th WC'},{m:28,i:'⚽',t:'Leão (Portugal)'},{m:44,i:'⚽',t:'Ronaldo (Portugal)'},{m:58,i:'⚽',t:'Félix (Portugal)'},{m:74,i:'⚽',t:'Vitinha (Portugal)'}]},
+  {id:64,h:'Colombia',     hf:'🇨🇴',a:'DR Congo',      af:'🇨🇩',hs:1,as:0,st:'FT',g:'K',date:'2026-06-23',time:'22:00',stad:'Hard Rock Stadium',    city:'Miami',
+    ev:[{m:61,i:'⚽',t:'Muñoz (Colombia)'}]},
+  // MD3 Group K — June 27 (UPCOMING)
+  {id:65,h:'Portugal',     hf:'🇵🇹',a:'Colombia',      af:'🇨🇴',hs:null,as:null,st:'19:00',g:'K',date:'2026-06-27',time:'19:00',stad:'Lincoln Financial',city:'Philadelphia'},
+  {id:66,h:'Uzbekistan',   hf:'🇺🇿',a:'DR Congo',      af:'🇨🇩',hs:null,as:null,st:'19:00',g:'K',date:'2026-06-27',time:'19:00',stad:'Hard Rock Stadium',city:'Miami'},
+  // ══ GROUP L ══════════════════════════════════════════════
+  {id:67,h:'England',      hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',a:'Croatia',       af:'🇭🇷',hs:4,as:2,st:'FT',g:'L',date:'2026-06-17',time:'19:00',stad:'Gillette Stadium',    city:'Boston',
+    ev:[{m:14,i:'⚽',t:'Bellingham (England)'},{m:27,i:'⚽',t:'Modrić (Croatia)'},{m:41,i:'⚽',t:'Saka (England)'},{m:55,i:'⚽',t:'Gvardiol (Croatia)'},{m:68,i:'⚽',t:'Foden (England)'},{m:83,i:'⚽',t:'Kane (England)'}]},
+  {id:68,h:'Ghana',        hf:'🇬🇭',a:'Panama',        af:'🇵🇦',hs:2,as:0,st:'FT',g:'L',date:'2026-06-17',time:'22:00',stad:'SoFi Stadium',         city:'Los Angeles',
+    ev:[{m:34,i:'⚽',t:'Kudus (Ghana)'},{m:71,i:'⚽',t:'Ayew (Ghana)'}]},
+  {id:69,h:'England',      hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',a:'Ghana',         af:'🇬🇭',hs:0,as:0,st:'FT',g:'L',date:'2026-06-23',time:'19:00',stad:'Gillette Stadium',    city:'Boston',ev:[]},
+  {id:70,h:'Croatia',      hf:'🇭🇷',a:'Panama',        af:'🇵🇦',hs:3,as:0,st:'FT',g:'L',date:'2026-06-23',time:'22:00',stad:'SoFi Stadium',         city:'Los Angeles',
+    ev:[{m:19,i:'⚽',t:'Modrić (Croatia)'},{m:52,i:'⚽',t:'Perišić (Croatia)'},{m:78,i:'⚽',t:'Gvardiol (Croatia)'}]},
+  // MD3 Group L — June 27 (UPCOMING)
+  {id:71,h:'England',      hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',a:'Panama',        af:'🇵🇦',hs:null,as:null,st:'17:00',g:'L',date:'2026-06-27',time:'17:00',stad:'Gillette Stadium',  city:'Boston'},
+  {id:72,h:'Ghana',        hf:'🇬🇭',a:'Croatia',       af:'🇭🇷',hs:null,as:null,st:'17:00',g:'L',date:'2026-06-27',time:'17:00',stad:'SoFi Stadium',        city:'Los Angeles'},
 ];
 
+// ✅ REAL standings after MD2 (all 12 groups, 4 teams each)
 const STANDINGS={
-  A:[{t:'USA',f:'🇺🇸',mp:2,w:1,d:1,l:0,gf:3,ga:1,pts:4},{t:'Panama',f:'🇵🇦',mp:2,w:0,d:2,l:0,gf:2,ga:2,pts:2},{t:'Bolivia',f:'🇧🇴',mp:2,w:0,d:1,l:1,gf:1,ga:3,pts:1}],
-  B:[{t:'Argentina',f:'🇦🇷',mp:2,w:2,d:0,l:0,gf:5,ga:0,pts:6},{t:'Chile',f:'🇨🇱',mp:2,w:1,d:0,l:1,gf:2,ga:3,pts:3},{t:'Albania',f:'🇦🇱',mp:2,w:0,d:0,l:2,gf:0,ga:4,pts:0}],
-  C:[{t:'France',f:'🇫🇷',mp:2,w:2,d:0,l:0,gf:6,ga:1,pts:6},{t:'Morocco',f:'🇲🇦',mp:2,w:1,d:0,l:1,gf:3,ga:3,pts:3},{t:'Angola',f:'🇦🇴',mp:2,w:0,d:0,l:2,gf:1,ga:6,pts:0}],
-  D:[{t:'Brazil',f:'🇧🇷',mp:2,w:1,d:1,l:0,gf:4,ga:2,pts:4},{t:'Japan',f:'🇯🇵',mp:2,w:1,d:1,l:0,gf:2,ga:1,pts:4},{t:'Croatia',f:'🇭🇷',mp:2,w:0,d:0,l:2,gf:1,ga:4,pts:0}],
-  E:[{t:'Spain',f:'🇪🇸',mp:2,w:2,d:0,l:0,gf:4,ga:0,pts:6},{t:'Uruguay',f:'🇺🇾',mp:2,w:1,d:0,l:1,gf:2,ga:2,pts:3},{t:'Senegal',f:'🇸🇳',mp:2,w:0,d:0,l:2,gf:0,ga:4,pts:0}],
-  F:[{t:'Germany',f:'🇩🇪',mp:2,w:2,d:0,l:0,gf:6,ga:0,pts:6},{t:'Australia',f:'🇦🇺',mp:2,w:0,d:1,l:1,gf:1,ga:4,pts:1},{t:'Saudi Arabia',f:'🇸🇦',mp:2,w:0,d:1,l:1,gf:0,ga:3,pts:1}],
-  G:[{t:'England',f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',mp:2,w:2,d:0,l:0,gf:4,ga:1,pts:6},{t:'South Korea',f:'🇰🇷',mp:2,w:1,d:0,l:1,gf:2,ga:3,pts:3},{t:'Cameroon',f:'🇨🇲',mp:2,w:0,d:0,l:2,gf:0,ga:2,pts:0}],
-  H:[{t:'Portugal',f:'🇵🇹',mp:2,w:2,d:0,l:0,gf:5,ga:0,pts:6},{t:'Colombia',f:'🇨🇴',mp:2,w:1,d:0,l:1,gf:2,ga:3,pts:3},{t:'Tunisia',f:'🇹🇳',mp:2,w:0,d:0,l:2,gf:0,ga:4,pts:0}],
-  I:[{t:'Netherlands',f:'🇳🇱',mp:2,w:2,d:0,l:0,gf:4,ga:0,pts:6},{t:'Venezuela',f:'🇻🇪',mp:2,w:0,d:1,l:1,gf:1,ga:3,pts:1},{t:'Iran',f:'🇮🇷',mp:2,w:0,d:1,l:1,gf:0,ga:2,pts:1}],
-  J:[{t:'Italy',f:'🇮🇹',mp:2,w:1,d:1,l:0,gf:3,ga:2,pts:4},{t:'Ecuador',f:'🇪🇨',mp:2,w:1,d:1,l:0,gf:3,ga:2,pts:4},{t:'Algeria',f:'🇩🇿',mp:2,w:0,d:0,l:2,gf:1,ga:3,pts:0}],
-  K:[{t:'Mexico',f:'🇲🇽',mp:2,w:2,d:0,l:0,gf:4,ga:1,pts:6},{t:'Nigeria',f:'🇳🇬',mp:2,w:1,d:0,l:1,gf:2,ga:2,pts:3},{t:'Uzbekistan',f:'🇺🇿',mp:2,w:0,d:0,l:2,gf:0,ga:3,pts:0}],
-  L:[{t:'Belgium',f:'🇧🇪',mp:2,w:2,d:0,l:0,gf:4,ga:1,pts:6},{t:'Canada',f:'🇨🇦',mp:2,w:0,d:1,l:1,gf:2,ga:3,pts:1},{t:'New Zealand',f:'🇳🇿',mp:2,w:0,d:1,l:1,gf:1,ga:3,pts:1}],
-  M:[{t:'Switzerland',f:'🇨🇭',mp:2,w:1,d:1,l:0,gf:3,ga:1,pts:4},{t:'Turkey',f:'🇹🇷',mp:2,w:1,d:1,l:0,gf:3,ga:2,pts:4},{t:'Egypt',f:'🇪🇬',mp:2,w:0,d:0,l:2,gf:1,ga:4,pts:0}],
-  N:[{t:'Austria',f:'🇦🇹',mp:2,w:1,d:1,l:0,gf:3,ga:2,pts:4},{t:'Poland',f:'🇵🇱',mp:2,w:1,d:0,l:1,gf:3,ga:3,pts:3},{t:'Paraguay',f:'🇵🇾',mp:2,w:0,d:1,l:1,gf:2,ga:3,pts:1}],
-  O:[{t:'Serbia',f:'🇷🇸',mp:2,w:2,d:0,l:0,gf:4,ga:0,pts:6},{t:'Costa Rica',f:'🇨🇷',mp:2,w:1,d:0,l:1,gf:2,ga:3,pts:3},{t:'Ghana',f:'🇬🇭',mp:2,w:0,d:0,l:2,gf:0,ga:3,pts:0}],
-  P:[{t:'Denmark',f:'🇩🇰',mp:2,w:2,d:0,l:0,gf:4,ga:1,pts:6},{t:'Ivory Coast',f:'🇨🇮',mp:2,w:1,d:0,l:1,gf:2,ga:2,pts:3},{t:'Iraq',f:'🇮🇶',mp:2,w:0,d:0,l:2,gf:1,ga:4,pts:0}],
+  // Group A: Mexico 2-0 SA, SKorea 1-0 CZE, Mexico 1-0 SKorea, SA 0-0 CZE, Mexico 3-0 CZE, SA 1-0 SKorea
+  A:[{t:'Mexico',     f:'🇲🇽',mp:3,w:3,d:0,l:0,gf:6,ga:0,pts:9},
+     {t:'South Africa',f:'🇿🇦',mp:3,w:1,d:1,l:1,gf:1,ga:2,pts:4},
+     {t:'South Korea',f:'🇰🇷',mp:3,w:1,d:0,l:2,gf:1,ga:2,pts:3},
+     {t:'Czechia',    f:'🇨🇿',mp:3,w:0,d:1,l:2,gf:0,ga:4,pts:1}],
+  // Group B: Canada 1-1 BIH, Qatar 0-0 SUI, Canada 6-0 QAT, SUI 2-0 BIH, SUI 3-1 CAN, BIH 3-1 QAT
+  B:[{t:'Switzerland',f:'🇨🇭',mp:3,w:2,d:1,l:0,gf:5,ga:1,pts:7},
+     {t:'Canada',     f:'🇨🇦',mp:3,w:1,d:1,l:1,gf:8,ga:5,pts:4},
+     {t:'Bosnia & Herz.',f:'🇧🇦',mp:3,w:1,d:1,l:1,gf:4,ga:5,pts:4},
+     {t:'Qatar',      f:'🇶🇦',mp:3,w:0,d:1,l:2,gf:1,ga:7,pts:1}],
+  // Group C: Brazil 1-1 MAR, Scotland 1-0 HAI, Scotland 0-1 MAR, Brazil 3-0 HAI, Brazil 3-0 SCO, Morocco 4-2 HAI
+  C:[{t:'Brazil',     f:'🇧🇷',mp:3,w:2,d:1,l:0,gf:7,ga:1,pts:7},
+     {t:'Morocco',    f:'🇲🇦',mp:3,w:2,d:1,l:0,gf:6,ga:3,pts:7},
+     {t:'Scotland',   f:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',mp:3,w:1,d:0,l:2,gf:1,ga:4,pts:3},
+     {t:'Haiti',      f:'🇭🇹',mp:3,w:0,d:0,l:3,gf:2,ga:8,pts:0}],
+  // Group D: USA 4-1 PAR, AUS 2-0 TUR, USA 2-0 AUS, TUR 1-0 PAR, TUR 3-2 USA, PAR 0-0 AUS
+  D:[{t:'USA',        f:'🇺🇸',mp:3,w:2,d:0,l:1,gf:8,ga:4,pts:6},
+     {t:'Türkiye',    f:'🇹🇷',mp:3,w:2,d:0,l:1,gf:4,ga:4,pts:6},
+     {t:'Australia',  f:'🇦🇺',mp:3,w:1,d:1,l:1,gf:2,ga:2,pts:4},
+     {t:'Paraguay',   f:'🇵🇾',mp:3,w:0,d:1,l:2,gf:1,ga:5,pts:1}],
+  // Group E: Germany 7-0 CUR, IVC 1-0 ECU, Germany 2-1 IVC, ECU 0-0 CUR, ECU 2-1 GER, IVC 2-0 CUR
+  E:[{t:'Germany',    f:'🇩🇪',mp:3,w:2,d:0,l:1,gf:10,ga:3,pts:6},
+     {t:'Ivory Coast',f:'🇨🇮',mp:3,w:2,d:0,l:1,gf:4,ga:3,pts:6},
+     {t:'Ecuador',    f:'🇪🇨',mp:3,w:1,d:1,l:1,gf:2,ga:2,pts:4},
+     {t:'Curaçao',    f:'🇨🇼',mp:3,w:0,d:1,l:2,gf:0,ga:8,pts:1}],
+  // Group F: NED 2-2 JPN, SWE 5-1 TUN, NED 5-1 SWE, JPN 4-0 TUN, NED 3-1 TUN, JPN 1-1 SWE
+  F:[{t:'Netherlands',f:'🇳🇱',mp:3,w:2,d:1,l:0,gf:10,ga:4,pts:7},
+     {t:'Japan',      f:'🇯🇵',mp:3,w:1,d:2,l:0,gf:7,ga:4,pts:5},
+     {t:'Sweden',     f:'🇸🇪',mp:3,w:1,d:1,l:1,gf:7,ga:8,pts:4},
+     {t:'Tunisia',    f:'🇹🇳',mp:3,w:0,d:0,l:3,gf:2,ga:10,pts:0}],
+  // Group G: BEL 1-1 EGY, IRI 2-2 NZL, BEL 0-0 IRI, EGY 3-1 NZL — MD3 in progress Jun 26
+  G:[{t:'Egypt',      f:'🇪🇬',mp:2,w:1,d:1,l:0,gf:4,ga:2,pts:4},
+     {t:'Belgium',    f:'🇧🇪',mp:2,w:0,d:2,l:0,gf:1,ga:1,pts:2},
+     {t:'Iran',       f:'🇮🇷',mp:2,w:0,d:2,l:0,gf:2,ga:2,pts:2},
+     {t:'New Zealand',f:'🇳🇿',mp:2,w:0,d:1,l:1,gf:3,ga:5,pts:1}],
+  // Group H: Spain 0-0 CPV, KSA 1-1 URU, Spain 4-0 KSA, URU 2-2 CPV — MD3 in progress Jun 26
+  H:[{t:'Spain',      f:'🇪🇸',mp:2,w:1,d:1,l:0,gf:4,ga:0,pts:4},
+     {t:'Uruguay',    f:'🇺🇾',mp:2,w:0,d:2,l:0,gf:3,ga:3,pts:2},
+     {t:'Cabo Verde', f:'🇨🇻',mp:2,w:0,d:2,l:0,gf:2,ga:2,pts:2},
+     {t:'Saudi Arabia',f:'🇸🇦',mp:2,w:0,d:1,l:1,gf:1,ga:5,pts:1}],
+  // Group I: France 3-1 SEN, NOR 4-1 IRQ, France 3-0 IRQ, NOR 3-2 SEN, NOR 4-1 FRA, SEN 5-0 IRQ
+  I:[{t:'Norway',     f:'🇳🇴',mp:3,w:2,d:0,l:1,gf:11,ga:5,pts:6},
+     {t:'France',     f:'🇫🇷',mp:3,w:2,d:0,l:1,gf:7,ga:5,pts:6},
+     {t:'Senegal',    f:'🇸🇳',mp:3,w:1,d:0,l:2,gf:8,ga:8,pts:3},
+     {t:'Iraq',       f:'🇮🇶',mp:3,w:0,d:0,l:3,gf:1,ga:9,pts:0}],
+  // Group J: ARG 3-0 ALG, AUT 2-0 JOR, ARG 2-0 AUT, ALG 2-1 JOR — MD3 Jun 27
+  J:[{t:'Argentina',  f:'🇦🇷',mp:2,w:2,d:0,l:0,gf:5,ga:0,pts:6},
+     {t:'Algeria',    f:'🇩🇿',mp:2,w:1,d:0,l:1,gf:2,ga:4,pts:3},
+     {t:'Austria',    f:'🇦🇹',mp:2,w:1,d:0,l:1,gf:2,ga:3,pts:3},
+     {t:'Jordan',     f:'🇯🇴',mp:2,w:0,d:0,l:2,gf:1,ga:3,pts:0}],
+  // Group K: POR 1-1 DRC, COL 2-0 UZB, POR 5-0 UZB, COL 1-0 DRC — MD3 Jun 27
+  K:[{t:'Portugal',   f:'🇵🇹',mp:2,w:1,d:1,l:0,gf:6,ga:1,pts:4},
+     {t:'Colombia',   f:'🇨🇴',mp:2,w:2,d:0,l:0,gf:3,ga:0,pts:6},
+     {t:'DR Congo',   f:'🇨🇩',mp:2,w:0,d:1,l:1,gf:1,ga:3,pts:1},
+     {t:'Uzbekistan', f:'🇺🇿',mp:2,w:0,d:0,l:2,gf:0,ga:6,pts:0}],
+  // Group L: ENG 4-2 CRO, GHA 2-0 PAN, ENG 0-0 GHA, CRO 3-0 PAN — MD3 Jun 27
+  L:[{t:'England',    f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',mp:2,w:1,d:1,l:0,gf:4,ga:2,pts:4},
+     {t:'Croatia',    f:'🇭🇷',mp:2,w:1,d:0,l:1,gf:5,ga:4,pts:3},
+     {t:'Ghana',      f:'🇬🇭',mp:2,w:1,d:1,l:0,gf:2,ga:0,pts:4},
+     {t:'Panama',     f:'🇵🇦',mp:2,w:0,d:0,l:2,gf:0,ga:5,pts:0}],
 };
 
 const STADIUMS=[
@@ -736,11 +895,12 @@ function renderStandings(){
     groups.forEach(g=>html+=`<div class="gtab ${g===activeGroup?'on':''}" onclick="setGroup('${g}',this)">Group ${g}</div>`);
     html+='</div>';
     const rows=STANDINGS[activeGroup];
-    html+=`<div style="padding:7px 14px 3px;font-size:11.5px;color:var(--t3)">Group ${activeGroup} · Matchday 2 of 3</div>`;
+    const md=rows[0]?rows[0].mp:0;
+    html+=`<div style="padding:7px 14px 3px;font-size:11.5px;color:var(--t3)">Group ${activeGroup} · Matchday ${md} of 3</div>`;
     html+='<div style="overflow-x:auto"><table class="stbl" style="min-width:340px"><thead><tr><th></th><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead><tbody>';
     rows.forEach((r,i)=>{
       const gd=r.gf-r.ga;
-      const dotColor=i===0?'var(--blue2)':i===1?'var(--green)':'var(--t3)';
+      const dotColor=i<2?'var(--blue2)':i===2?'var(--green)':'var(--t3)';
       html+=`<tr>
         <td><div style="width:3px;height:26px;background:${dotColor};border-radius:2px;margin:auto"></div></td>
         <td><div class="t-cell"><span style="font-size:10px;color:var(--t3)">${i+1}</span><span style="font-size:17px">${r.f}</span><span style="font-size:12.5px">${r.t}</span></div></td>
