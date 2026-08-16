@@ -325,10 +325,12 @@ async function sbGet() {
   return (await r.json()).map(fromDb);
 }
 async function sbUpsert(row) {
+  if(!DB_ONLINE){const i=DATA.findIndex(d=>d.id===row.id);if(i>=0)DATA[i]=row;else DATA.push(row);lsSave();return;}
   const r = await fetch(`${SB_URL}/rest/v1/universities`,{method:'POST',headers:{...sbH(),'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(toDb(row))});
   if(!r.ok) throw new Error(await r.text());
 }
 async function sbDelete(id) {
+  if(!DB_ONLINE){DATA=DATA.filter(d=>d.id!==id);lsSave();return;}
   const r = await fetch(`${SB_URL}/rest/v1/universities?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:sbH()});
   if(!r.ok) throw new Error(await r.text());
 }
@@ -371,22 +373,45 @@ const SEED=[
   {id:'de1',name:'Constructor University (formerly Jacobs University)',country:'Germany'},
 ].map(r=>({...r,status:'Not Contacted',contact:'',dateContacted:'',lastContact:'',meeting:'',followup:'',verbal:'',signed:'',contractStart:'',contractEnd:'',reminder:'',notes:''}));
 
+let DB_ONLINE = false;
+const LS_KEY = 'sn_universities_v2';
+
+function lsSave(){try{localStorage.setItem(LS_KEY,JSON.stringify(DATA));}catch(e){}}
+function lsLoad(){try{const d=localStorage.getItem(LS_KEY);return d?JSON.parse(d):null;}catch(e){return null;}}
+
 async function init(){
   showLoading('Connecting to database…');
   try{
     DATA=await sbGet();
+    DB_ONLINE=true;
     if(DATA.length===0){showLoading('First run — setting up universities…');await sbSeedMany(SEED);DATA=await sbGet();}
+    lsSave();
   }catch(e){
-    hideLoading();
-    alert('Cannot connect to database.\n\nPlease update SB_URL and SB_KEY in admin.html with your Supabase credentials (see DEPLOY.md for instructions).');
-    return;
+    // DB unavailable — try localStorage, then fall back to SEED
+    const cached=lsLoad();
+    if(cached&&cached.length>0){
+      DATA=cached;
+      DB_ONLINE=false;
+      showOfflineBanner('⚠ Database offline — showing saved local data. Changes will be saved locally only.');
+    } else {
+      DATA=SEED.map(r=>({...r}));
+      DB_ONLINE=false;
+      showOfflineBanner('⚠ Database offline — loaded default list. Changes saved locally until DB is restored.');
+      lsSave();
+    }
   }
   hideLoading();renderTable();checkReminders();initFloatingScrollbar();
 }
 
+function showOfflineBanner(msg){
+  let b=document.getElementById('offline-banner');
+  if(!b){b=document.createElement('div');b.id='offline-banner';b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#e67e22;color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-weight:600;';document.body.prepend(b);}
+  b.textContent=msg;
+}
+
 async function refreshData(){
   showLoading('Refreshing…');
-  try{DATA=await sbGet();}catch(e){setSaveStatus('error','⚠ Refresh failed');}
+  try{DATA=await sbGet();DB_ONLINE=true;lsSave();const b=document.getElementById('offline-banner');if(b)b.remove();}catch(e){setSaveStatus('error','⚠ Refresh failed');}
   hideLoading();renderTable();
 }
 
