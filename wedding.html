@@ -791,17 +791,25 @@ function showSync(state) {
       loading:{ t:'⟳ Syncing',  c:'#f0d090' },
       saving: { t:'⟳ Saving…',  c:'#f0d090' },
       synced: { t:'✓ Synced',   c:'#74c69d' },
+      updated:{ t:'↓ Updated!', c:'#74c69d' },
       error:  { t:'✗ Sync err', c:'#ff8080' },
       offline:{ t:'',           c:'rgba(255,255,255,.3)' },
     };
     const s = map[state]||map.offline;
     el.textContent = s.t; el.style.color = s.c;
+    // Flash "Updated!" then fade back to Synced
+    if(state === 'updated') {
+      setTimeout(() => { el.textContent = '✓ Live'; el.style.color = '#74c69d'; }, 3000);
+    }
   });
 }
 
-async function loadCloudData() {
+// Track when we last saved to cloud so merge can compare timestamps
+let lastCloudSaveTs = parseInt(localStorage.getItem('wi_lastSaveTs') || '0');
+
+async function loadCloudData(silent) {
   try {
-    showSync('loading');
+    if(!silent) showSync('loading');
     const res = await fetch(SYNC_API + '?t=' + Date.now());
     if(!res.ok) throw new Error('fetch failed');
     const d = await res.json();
@@ -810,20 +818,18 @@ async function loadCloudData() {
     const cloudExpenses = d.expenses || [];
     const cloudTasks    = d.tasks    || [];
     const cloudTables   = d.tables   || [];
+    const cloudTs       = d.savedAt  || 0;  // timestamp cloud data was last saved
 
-    // Smart merge: whichever side has more real data wins
-    const localGuestCount = guests.length;
-    const cloudGuestCount = cloudGuests.length;
-    const localPaid = expenses.reduce((a,e)=>a+Number(e.paid||0),0);
-    const cloudPaid = cloudExpenses.reduce((a,e)=>a+Number(e.paid||0),0);
-    const localHasMore = localGuestCount > cloudGuestCount || localPaid > cloudPaid;
+    // Smart merge: use timestamp — cloud wins if it was saved more recently
+    // If admin on this device saved more recently than cloud, push up
+    const localHasMore = isAdmin && lastCloudSaveTs > cloudTs &&
+      (guests.length > 0 || expenses.some(e=>Number(e.paid)>0));
 
-    if (localHasMore && isAdmin) {
-      // Local is richer — push up to cloud
+    if (localHasMore) {
       showSync('saving');
       await saveCloudData();
-    } else {
-      // Cloud is richer — pull down
+    } else if (cloudTs > lastCloudSaveTs || !isAdmin) {
+      // Cloud is newer — pull down
       if(cloudGuests.length   > 0) { guests   = cloudGuests;   save('guests',   guests);   }
       if(cloudExpenses.length > 0) { expenses = cloudExpenses; save('expenses', expenses); }
       if(cloudTasks.length    > 0) { tasks    = cloudTasks;    save('tasks',    tasks);    }
@@ -833,13 +839,49 @@ async function loadCloudData() {
         BAKED_SPOTIFY_URL   = d.settings.spotifyUrl;
         save('settings', settings);
       }
+      // Restore photos
+      if(d.photos && d.photos.length > 0) {
+        photos = d.photos;
+        save('photos', photos);
+      }
+      if(d.venuePhotos) {
+        Object.entries(d.venuePhotos).forEach(([k,v]) => {
+          if(v) localStorage.setItem('vp_'+k, v);
+        });
+      }
+      lastCloudSaveTs = cloudTs;
+      localStorage.setItem('wi_lastSaveTs', String(cloudTs));
+      // Re-render current section if visible
+      const active = document.querySelector('.sec.active');
+      if(active) {
+        const sec = active.id ? active.id.replace('Sec','') : '';
+        if(sec === 'home') renderHome();
+        else if(sec === 'guests') { if(typeof renderGuests==='function') renderGuests(); }
+        else if(sec === 'budget') { if(typeof renderBudget==='function') renderBudget(); }
+        else if(sec === 'tasks')  { if(typeof renderTasks==='function')  renderTasks();  }
+        else if(sec === 'album')  { if(typeof renderAlbum==='function')  renderAlbum();  }
+        else if(sec === 'venues') loadVenuePhotos();
+      }
+      showSync(silent ? 'updated' : 'synced');
+    } else {
       showSync('synced');
     }
     return true;
   } catch(e) {
-    showSync('offline');
+    if(!silent) showSync('offline');
     return false;
   }
+}
+
+// Auto-poll for live updates from other devices
+let _autoPollTimer = null;
+function startAutoSync() {
+  if(_autoPollTimer) clearInterval(_autoPollTimer);
+  // Viewers poll every 20s; admins poll every 45s (they save on every change anyway)
+  const interval = isAdmin ? 45000 : 20000;
+  _autoPollTimer = setInterval(() => {
+    loadCloudData(true); // silent = no loading spinner
+  }, interval);
 }
 
 async function saveCloudData() {
@@ -856,8 +898,10 @@ async function saveCloudData() {
     const d = localStorage.getItem('vp_'+k);
     if(d && d.length < 600000) venuePhotos[k] = d;
   });
+  const nowTs = Date.now();
   const payload = {
     version: 1,
+    savedAt: nowTs,
     settings: { spotifyUrl: settings.spotifyUrl || BAKED_SPOTIFY_URL || '' },
     expenses, guests, tasks, tables,
     photos: syncPhotos,
@@ -870,6 +914,8 @@ async function saveCloudData() {
       body: JSON.stringify(payload)
     });
     if(!res.ok) throw new Error(await res.text());
+    lastCloudSaveTs = nowTs;
+    localStorage.setItem('wi_lastSaveTs', String(nowTs));
     showSync('synced');
     return true;
   } catch(e) {
@@ -1037,7 +1083,8 @@ function enter() {
   renderHome();
   startCountdown();
   setTimeout(loadVenuePhotos, 100);
-  loadCloudData().then(() => { renderHome(); loadSpotify(); });
+  loadCloudData().then(() => { renderHome(); loadSpotify(); loadVenuePhotos(); });
+  startAutoSync();
   go('home');
 }
 
