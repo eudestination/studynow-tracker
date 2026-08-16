@@ -1,10 +1,14 @@
 {
   "version": 1,
-  "settings": {
-    "spotifyUrl": "https://open.spotify.com/playlist/5Vci5jN5ImXhnYbTfjPC5B?si=mlYJR0Y0RbqAUcuMTwLGKw"
-  },
+  "savedAt": 1234567890,
   "guests": [],
   "expenses": [],
   "tasks": [],
-  "tables": []
+  "tables": [],
+  "photos": [],
+  "venuePhotos": {},
+  "settings": {
+    "spotifyUrl": ""
+  },
+  "lastUpdated": "2026-08-16T20:57:26.998Z"
 }
